@@ -27,7 +27,8 @@ This is a personal documentation of the Professor Messer Security+ 701 Training.
 
 - Hands-On ==> ProfessorMesser.com
 
-<img width="1256" height="603" alt="1 0 Overview" src="https://github.com/user-attachments/assets/86ade7c3-3e1e-4141-8b35-59a396a383f4" />
+<img width="1256" height="603" alt="1 0 Overview" src="https://github.com/burcuhuff/secure-agent-execution/blob/main/scripts/Security+701/1.0%20Overview.png?raw=true" />
+
 
 ---
 
@@ -42,9 +43,12 @@ This is a personal documentation of the Professor Messer Security+ 701 Training.
 
 - Physical Controls (Guards, Locks, Badges)
 
+<img width="1256" height="603" alt="1.1 Security Goals" src="https://github.com/burcuhuff/secure-agent-execution/blob/main/scripts/Security+701/1.1%20Security%20Goals.png?raw=true" />
+
 
 ### 1.2 Security Concepts
 - The CIA Triad (Confidentiality, Integrity, Availability)
+<img width="1256" height="603" alt="1.2 The CIA Triad" src="https://github.com/burcuhuff/secure-agent-execution/blob/main/scripts/Security+701/1.2%20The%20CIA%20Triad.png?raw=true" />
 
 - Confidentiality: Encryption, Limits - access control, Two factor authenticaton
 
@@ -54,7 +58,18 @@ This is a personal documentation of the Professor Messer Security+ 701 Training.
 
 
 ### 1.3 Change Management
-Non-repudiation: Proof of integrity (encryption) + Proof of origin (authentication)
+- Non-repudiation: Proof of integrity (encryption) + Proof of origin (authentication)
+
+<img width="1256" height="603" alt="1.3 Authentication" src="https://github.com/burcuhuff/secure-agent-execution/blob/main/scripts/Security+701/1.2%20Authentication.png?raw=true" />
+
+- Digital Signature:
+<img width="1256" height="603" alt="1.3 Digital Signature" src="<img width="1918" height="1076" alt="image" src="https://github.com/burcuhuff/secure-agent-execution/blob/main/scripts/Security+701/1.2%20Digital%20Signature.png?raw=true" />
+
+- Verification of Digital Signature:
+<img width="1256" height="603" alt="1.3 Verification of Digital Signature" src="<img width="1918" height="1076" alt="image" src="https://github.com/burcuhuff/secure-agent-execution/blob/main/scripts/Security+701/1.4%20Verifying%20Digital%20Signature.png?raw=true" />
+
+- Zero Trust:
+<img width="1256" height="603" alt="1.3 Zero Trust" src="https://github.com/burcuhuff/secure-agent-execution/blob/main/scripts/Security+701/1.2%20Zero%20Trust%20.png?raw=true" />
 
 ### 1.4 Cryptographic Solutions
 
@@ -63,12 +78,14 @@ Non-repudiation: Proof of integrity (encryption) + Proof of origin (authenticati
 - Starts with identification -> Authorization is next -> A log of what happened shows the Accounting in terms of resources used. 
 
 - Blockchain Ledger: Distributed Ledger keeps track of transactions, pay,ents, digital voting, etc.
+<img width="1256" height="603" alt="1.4 Blockchain Process" src="https://github.com/burcuhuff/secure-agent-execution/blob/main/scripts/Security+701/1.4%20Blockchain%20Process.png?raw=true" />
 
 - Digital Certifications: 
 
 - Binds public key with a digital signature.
 
 - PKI uses digital certificates to authorize for additional trust.
+<img width="1256" height="603" alt="1.4 PKI" src="https://github.com/burcuhuff/secure-agent-execution/blob/main/scripts/Security+701/1.4%20Public%20Key.png?raw=true" />
 
 - Standar format is X.509
 
@@ -79,6 +96,8 @@ Non-repudiation: Proof of integrity (encryption) + Proof of origin (authenticati
 - Example attack ==> "Heartbleed" Open SSL app library using app server private key - 2014
 
 - OCSCP ==> Online Certificate Status Protocol (cross referencing CRL)
+
+<img width="1256" height="603" alt="1.4 Encryption Algorithm Comparison" src="https://github.com/burcuhuff/secure-agent-execution/blob/main/scripts/Security+701/1.4%20Encryption%20Algorithm%20Comparison.png?raw=true" />
 
 ---
 
