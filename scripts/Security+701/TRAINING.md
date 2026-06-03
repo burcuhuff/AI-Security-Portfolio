@@ -131,13 +131,30 @@ This is a personal documentation of the Professor Messer Security+ 701 Training.
   - DDoS is an Asymetric Threat (number of attackers vs the number of services they reach)
   - DNS amplification DDoS
   <img width="1256" height="603" alt="1.4 DOS Amplification Distributed" src="https://github.com/burcuhuff/secure-agent-execution/blob/main/scripts/Security+701/1.4%20DDoS.png?raw=true" />
-  - DNS Poisining Attacks:
+  - DNS Poisoning Attacks:
       - Modifies DNS server over the client host file that precedent over DNS queries.
       - Attack takes place by sending a fake response to a valis DNS request
       - Requirs a redirectioon of the original request
       - Occurs real time redirection
       - It's an on-path attack
-- Wireless attacks
+      <img width="1256" height="603" alt="DNS Spoofing / Poisoning" src="https://github.com/burcuhuff/secure-agent-execution/blob/main/scripts/Security+701/2.4%20DNS%20Attacks%20-%20Spoofing%20and%20Posining.png?raw=true" />
+- Wireless attack
+    - Disconnects wireless users frequently by deauthentication causing a significant wireless DoS attack.
+    - Main vulnerability associated with this attack relates to the 802.11 management frames that are sent and recieved by the access point to and from your machine.
+    - Management frames are used to connect your device to the wireless network, manage connection, and disconnect from the network when we done with the wireless connection.
+    - The connection and disconnection requires authentication and deauthentication of the device and the earlier versions of these management frames (802.11) didn't have the necessary security protocols (no encryption).
+    - IEEE has upgraded the management frames to 802.11ac by encrypting some of the important management frames (disassociate, deauthenticate, channel switch annoucements etc).
+    - Sample Wireless Attack:
+        - Getting the information from the network: Running a command with airodump-ng utility and specifying the wirelss connection:
+        <img width="1256" height="603" alt="Wireless Attack airodump-ng utility" src="https://github.com/burcuhuff/secure-agent-execution/blob/main/scripts/Security+701/2.4%20Wireless%20Attack%20-%20airodump-ng%20to%20list%20the%20devices.png?raw=true" />
+        - Listing hardware addresses for the wireless access point and the device:
+        <img width="1256" height="603" alt="Wireless Attack listed the devicess" src="https://github.com/burcuhuff/secure-agent-execution/blob/main/scripts/Security+701/2.4%20Wireless%20Attack%20-%20airodump-ng%20returning%20device%20list.png?raw=true" />
+        - Running a command to send deauthentication frames across the wireless network - using the utility "aireplay-ng" and specify "-0" to send deauthentication frames, select wireless access points (hardware ID) and the device we'd like to remove from the wireless with its mac address. 
+        <img width="1256" height="603" alt="Wireless Attack sending aireplay-ng to deauth the device" src="https://github.com/burcuhuff/secure-agent-execution/blob/main/scripts/Security+701/2.4%20Wireless%20Attack%20-%20aireplay%20command%20to%20remove%20the%20device.png?raw=true" />
+        - Once the aireplay runs the "pm" network listed on the left side would disappear and can't connect back as long as the command is running. 
+        <img width="1256" height="603" alt="aireplay-ng disappears the network" src="https://github.com/burcuhuff/secure-agent-execution/blob/main/scripts/Security+701/2.4%20Wireless%20Attack%20-%20attacked%20network%20disappears%20.png?raw=true" />
+        - As long as the deauthentication frames are sent the device can't connect to the wireless
+        <img width="1256" height="603" alt="Wireless Attack device can't connect while the deauth frames are sent" src="https://github.com/burcuhuff/secure-agent-execution/blob/main/scripts/Security+701/2.4%20Wireless%20Attack%20-%20device%20can't%20connect%20while%20deauth%20frames%20are%20being%20sent.png?raw=true" />
 - Replay attacks
 - Malicious code
 - Application attacks
