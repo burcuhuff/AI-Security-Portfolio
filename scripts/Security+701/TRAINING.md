@@ -145,9 +145,9 @@ This is a personal documentation of the Professor Messer Security+ 701 Training.
     - The connection and disconnection requires authentication and deauthentication of the device and the earlier versions of these management frames (802.11) didn't have the necessary security protocols (no encryption).
     - Packet capture on 802.11
     <img width="1256" height="603" alt="Packet capture on 802.11 wireless network" src="https://github.com/burcuhuff/secure-agent-execution/blob/main/scripts/Security+701/2.4%20Packet%20Capture%20on%20802.11.png?raw=true" />
-    - IEEE has upgraded the management frames to 802.11ac by encrypting some of the important management frames (disassociate, deauthenticate, channel switch annoucements etc).
+    - IEEE has upgraded the management frames to 802.11ac and newer by encrypting some of the important management frames (disassociate, deauthenticate, channel switch annoucements etc).
     - Sample Wireless Attack:
-        - Getting the information from the network: Running a command with airodump-ng utility and specifying the wirelss connection:
+        - Getting the information from the network: Running a command with airodump-ng utility and specifying the wirelss card:
         <img width="1256" height="603" alt="Wireless Attack airodump-ng utility" src="https://github.com/burcuhuff/secure-agent-execution/blob/main/scripts/Security+701/2.4%20Wireless%20Attack%20-%20airodump-ng%20to%20list%20the%20devices.png?raw=true" />
         - Listing hardware addresses for the wireless access point and the device:
         <img width="1256" height="603" alt="Wireless Attack listed the devicess" src="https://github.com/burcuhuff/secure-agent-execution/blob/main/scripts/Security+701/2.4%20Wireless%20Attack%20-%20airodump-ng%20returning%20device%20list.png?raw=true" />
@@ -157,6 +157,12 @@ This is a personal documentation of the Professor Messer Security+ 701 Training.
         <img width="1256" height="603" alt="aireplay-ng disappears the network" src="https://github.com/burcuhuff/secure-agent-execution/blob/main/scripts/Security+701/2.4%20Wireless%20Attack%20-%20attacked%20network%20disappears%20.png?raw=true" />
         - As long as the deauthentication frames are sent the device can't connect to the wireless
         <img width="1256" height="603" alt="Wireless Attack device can't connect while the deauth frames are sent" src="https://github.com/burcuhuff/secure-agent-execution/blob/main/scripts/Security+701/2.4%20Wireless%20Attack%20-%20device%20can't%20connect%20while%20deauth%20frames%20are%20being%20sent.png?raw=true" />
+- On-Path attacks:
+    - Invisible to the victim.
+    - ARP poisoning (Address Resolution Protocol spoofing)
+    <img width="1256" height="603" alt="legiminate ARP connectio" src="https://github.com/burcuhuff/secure-agent-execution/blob/main/scripts/Security+701/2.4%20ARP%20Poisoning%201.png?raw=true" />
+    <img width="1256" height="603" alt="attacker overwriting the cache" src="https://github.com/burcuhuff/secure-agent-execution/blob/main/scripts/Security+701/2.4%20ARP%20Poisoning%202.png?raw=true" />
+    <img width="1256" height="603" alt="attacker taking over the communication with the router" src="https://github.com/burcuhuff/secure-agent-execution/blob/main/scripts/Security+701/2.4%20ARP%20Poisoning%203.png?raw=true" />
 - Replay attacks
 - Malicious code
 - Application attacks
