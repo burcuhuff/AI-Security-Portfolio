@@ -224,7 +224,12 @@ This is a personal documentation of the Professor Messer Security+ 701 Training.
     - Aggregte information from devices built-in sensors, servers, switches, routers, filewalls => SIEM consoles to collect all the information and monitor the data
     - Least privilege
     - Decommisioning old devices
-  
+- Harderning Techniques
+    - System or hardware hardening with encryption
+    - EDR - Endpoint detetion and response
+    - Host-based firewall
+    - HIPS (Host-based Intrusion Prevension System)
+    - Nmap scans open ports for an application
 ---
 
 ## Section 3: Security Architecture
