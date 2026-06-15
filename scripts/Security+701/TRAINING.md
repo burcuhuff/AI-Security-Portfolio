@@ -6,9 +6,7 @@ This is a personal documentation of the Professor Messer Security+ 701 Training.
 
 ---
 
-## Section 0: The SY0-701 CompTIA Security+ Exam
-**Topics:**
-### Introduction
+## Section Intro: The SY0-701 CompTIA Security+ Exam
 - ComTIA - Computer Technology Industry Association
 
 - Last Exam Released in Nov 2023, will be available until Nov 2026 with 6 months grace period.
@@ -241,12 +239,20 @@ This is a personal documentation of the Professor Messer Security+ 701 Training.
 <img width="1256" height="603" alt="Cloud Infrastructures" src="https://github.com/burcuhuff/secure-agent-execution/blob/main/scripts/Security+701/images/3.1%20Cloud%20Infrastrucrure.png?raw=true" />
 - FaaS - Function  as a service (serveless archutecture) applocations are seperated into autnomous functions regarless of infrastructure runs underneath
     - <p><img width="250" height="300" alt="Monolithic Architecture" src="https://github.com/burcuhuff/secure-agent-execution/blob/main/scripts/Security+701/images/3.1%20Monolithic%20Architecture.png?raw=true" /> <img width="300" heigth="300" alt="Microservice Architecture" src="https://github.com/burcuhuff/secure-agent-execution/blob/main/scripts/Security+701/images/3.1%20Microservice%20Architecture.png?raw=true" /></p>
-- Network Infrastructure Concepts
+- Network Infrastructure Concepts: Pyhsical and logical separation
+<img width="1256" height="603" alt="VLAN" src="https://github.com/burcuhuff/secure-agent-execution/blob/main/scripts/Security+701/images/3.1%20VLAN.png?raw=true" />
+
+<img width="1256" height="603" alt="Planes" src="https://github.com/burcuhuff/secure-agent-execution/blob/main/scripts/Security+701/images/3.1%20Planes.png?raw=true" />
+
+<img width="1256" height="603" alt="SDN Data Flows" src="https://github.com/burcuhuff/secure-agent-execution/blob/main/scripts/Security+701/images/3.1%20SDN%20Data%20Flows.png?raw=true" />
+
+<img width="1256" height="603" alt="SDN Security" src="https://github.com/burcuhuff/secure-agent-execution/blob/main/scripts/Security+701/images/3.1%20SDN%20Security.png?raw=true" />
+
 
 ### 3.2 Applying Security Principles
 - Secure Infrastructures
-- Intrusion Prevention
-- Network Appliances
+- Intrusion Prevention (Fail-Open / Fail-Closed)
+- Network Appliances (Jump server, Proxies - explicit or transparent, HTTTP, HTTPS, etc, Forward Proxy, Reverse Proxy, Open Proxy)
 - Port Security
 - Firewall Types
 - Secure Communication
