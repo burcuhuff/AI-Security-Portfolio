@@ -28,20 +28,20 @@
 
 # Build sequence
 
-## Week 1: 
-Synthetic dataset generation — Python/Faker library, 5-10k rows, realistic HR attributes with quasi-identifiers (age, zip, department, gender, salary band)
+## Week 1
+Synthetic dataset generation: Python/Faker library, 5-10k rows, realistic HR attributes with quasi-identifiers (age, zip, department, gender, salary band)
 
-## Week 2: 
+## Week 2 
 
-k-anonymity implementation — generalize/suppress quasi-identifiers until every record matches k others. Directly from DATASCI-233 Mondrian/Incognito coursework.
+k-anonymity implementation: generalize/suppress quasi-identifiers until every record matches k others. Directly from DATASCI-233 Mondrian/Incognito coursework.
 
 l-diversity check — verify sensitive attributes (salary, performance rating) have diversity within each anonymized group, not just k-anonymity
 
-## Weeks 3-4: 
+## Weeks 3-4
 
-Differential privacy layer — Laplace mechanism for aggregate queries (avg salary, headcount by dept) with configurable epsilon, show the privacy/accuracy tradeoff visually
+Differential privacy layer: Laplace mechanism for aggregate queries (avg salary, headcount by dept) with configurable epsilon, show the privacy/accuracy tradeoff visually
 
-## Weeks 5-7: 
+## Weeks 5-7 
 
 Dashboard — small Streamlit or Flask app showing original vs anonymized vs differentially-private results side by side. 
 
@@ -84,4 +84,4 @@ git add .gitignore requirements.txt
 To recreate the environment: ```pip install -r requirements.txt```
 ### Notes: 
 
-- Press Cmd + Shift + P (Mac) to open the Command Palette.Type Python: Select Interpreter and select it.Look for the entry that says ('venv': venv) or shows the path containing privacy-hr-pipeline/venv/bin/python. Click it.
+- Press Cmd + Shift + P to open the Command Palette.Type Python: Select Interpreter and select it.Look for the entry that says ('venv': venv) or shows the path containing privacy-hr-pipeline/venv/bin/python. Click it.
