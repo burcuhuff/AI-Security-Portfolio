@@ -276,11 +276,38 @@ This is a personal documentation of the Professor Messer Security+ 701 Training.
 ## Section 4: Security Operations
 Topics:
 ### 4.1 Security Techniques in Computing Resources
+- Secure baselines (example MS SCT - Security Compliance Toolkit) - usually one and done but some updates may be needed.
+- Hardening targets
+    - mobile devices: allways connected devices, updates are critical, segmentation can protect data (company / user data)
+    - user destops and laptops
+    - switches, routers, purpose-built devices
+    - secure the cloud management workstations, least privildge, configure endpoints detection and Response (EDR), backups
+- Securing wireless and mobile
+    - site surveys (heat way)
+    - BYOD devices have to meet company policies, data on the old phone needs to be deleted
+    - COPE (company owns persaonlly enabled)
+    - Wi-Fi Protected Access 3 (WPA3) uses SAE (Simultaneous Authenthication of Equals (Dragon Fly handshake)
+    - AAA Framework (most famous : RADIUS Remote Authentication Dial-in User Service)
+    - IEEE 802.1X along with RADIUS, LDAP, TACAS+
+- Application Security
+    - Secure coding: input validation (use fuzzers to find out input validation range)
+    - Cookies (a data file, not an executable, is seen and read from browser)
+    - Static Application Security Testing (SAST) to find vulnerabilities that are hidden in the logic of the code, not onservable from code review
+    - Code signing for application deployment
+    - Sandboxing
+    - Application security monitoring (real-time, view blocked attacks, audit the logs, anomalu detection)
 ### 4.2 Asset Management
+- Acquisition / Procurement porocess
 ### 4.3 Vulnerability Management
+- Vulnerability scanning (not penetration), ex: port scan
+- Dynamic analysis (fuzzing)
+- Package monitoring for third party
 ### 4.4 Incident Response
 ### 4.5 Security Monitoring
 ### 4.6 Disaster Recovery and Business Continuity
+### 4.7
+### 4.8
+### 4.9
 
 
 
