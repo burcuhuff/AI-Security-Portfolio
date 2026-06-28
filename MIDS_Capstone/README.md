@@ -1,8 +1,9 @@
-# Secure Agent Execution Platform
+# Secure Agent Execution Platform as part of MIDS Capstone 
+https://www.ischool.berkeley.edu/projects/2025/agent-iq-build-and-test-ai-agents-scale
 
 > A security first backend architecture for safely executing untrusted, user submitted AI agent scripts in a shared multi-tenant environment.
 
-This is a personal documentation of the backend and security architecture I designed and built as part of the [Agent IQ capstone project](https://www.ischool.berkeley.edu/projects/2025/agent-iq-build-and-test-ai-agents-scale) at UC Berkeley's Master of Information and Data Science (MIDS) program, Fall 2025.
+This is a personal documentation of the backend and security architecture I soley designed and built as part of the [Agent IQ capstone project](https://www.ischool.berkeley.edu/projects/2025/agent-iq-build-and-test-ai-agents-scale) at UC Berkeley's Master of Information and Data Science (MIDS) program, Fall 2025.
 
 Advising Faculty on reviews and feedback: Prof. Daniel Aranki
 
@@ -174,4 +175,3 @@ The broader platform included a frontend UI built by a teammate. The full projec
 
 ---
 
-*Burcu Huff · UC Berkeley MIDS '25 · AI Security & Privacy Engineering*
