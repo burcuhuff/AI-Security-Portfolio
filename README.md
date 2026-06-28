@@ -8,7 +8,7 @@ The second highlights my independent work in Privacy Engineering, where I design
 
 # Repository Guide
 
-## 🚀 1. Security Component of the MIDS Capstone Project
+## 1. Security Component of the MIDS Capstone Project
 
 Learn about the overall project, including:
 
@@ -21,7 +21,7 @@ Learn about the overall project, including:
 
 ---
 
-## 🔒 2. Privacy Engineering Portfolio
+## 2. Privacy Engineering Portfolio
 
 Explore my individual engineering work, including:
 
