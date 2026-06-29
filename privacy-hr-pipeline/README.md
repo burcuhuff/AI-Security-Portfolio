@@ -28,22 +28,22 @@
 
 # Build sequence
 
-## Week 1
-Synthetic dataset generation: Python/Faker library, 5-10k rows, realistic HR attributes with quasi-identifiers (age, zip, department, gender, salary band)
+## 1. Synthetic dataset generation: 
+Python/Faker library, 5-10k rows, realistic HR attributes with quasi-identifiers (age, zip, department, gender, salary band)
 
-## Week 2 
+## 2. k-anonymity implementation: 
 
-k-anonymity implementation: generalize/suppress quasi-identifiers until every record matches k others. Directly from DATASCI-233 Mondrian/Incognito coursework.
+Generalize/suppress quasi-identifiers until every record matches k others. Directly from DATASCI-233 Mondrian/Incognito coursework.
 
 l-diversity check — verify sensitive attributes (salary, performance rating) have diversity within each anonymized group, not just k-anonymity
 
-## Weeks 3-4
+## 3. Differential privacy layer:
 
-Differential privacy layer: Laplace mechanism for aggregate queries (avg salary, headcount by dept) with configurable epsilon, show the privacy/accuracy tradeoff visually
+Laplace mechanism for aggregate queries (avg salary, headcount by dept) with configurable epsilon, show the privacy/accuracy tradeoff visually
 
-## Weeks 5-7 
+## 4. Dashboard
 
-Dashboard — small Streamlit or Flask app showing original vs anonymized vs differentially-private results side by side. 
+Streamlit or Flask app showing original vs anonymized vs differentially-private results side by side. 
 
 
 # Env Setup
