@@ -104,3 +104,9 @@ To recreate the environment: ```pip install -r requirements.txt```
   jupyter notebook
 
   ```
+- For the dashboard install streamlit
+    
+  ```
+  source venv/bin/activate
+  pip install streamlit
+  ```
