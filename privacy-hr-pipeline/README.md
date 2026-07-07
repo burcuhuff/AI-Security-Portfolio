@@ -241,10 +241,9 @@ Streamlit or Flask app showing original vs anonymized vs differentially-private 
 
 <p>
 <img width="300" height="300" alt="Tab3 (l-diversity)" src="https://github.com/burcuhuff/AI-Security-Portfolio/blob/main/scripts/Security+701/images/Dashboard-Tab3.png?raw=true">
-<img width="300" height="300" alt="Tab4 (DP)" src="https://github.com/burcuhuff/AI-Security-Portfolio/blob/main/scripts/Security+701/images/Dashboard-Tab4.png?raw=true"> 
+<img width="300" height="300" alt="Tab4 (t-closeness)" src="https://github.com/burcuhuff/AI-Security-Portfolio/blob/main/scripts/Security+701/images/Dashboard-Tabs4-5.png?raw=true">
+<img width="300" height="300" alt="Tab5 (DP)" src="https://github.com/burcuhuff/AI-Security-Portfolio/blob/main/scripts/Security+701/images/Dashboard-Tab4.png?raw=true"> 
 </p>
-
-<TBD - Add T-closeness tab>
 # Env Setup
 
 ### Python 3.13.7 via pyenv
