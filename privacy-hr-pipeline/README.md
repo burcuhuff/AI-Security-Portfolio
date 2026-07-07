@@ -1,4 +1,4 @@
-# Project: Privacy-Preserving HR Analytics Pipeline ***** WIP *****
+# Project: Privacy-Preserving HR Analytics Pipeline
 
 - Self driven project focuses on k-anonymity, l-diversity, differential privacy applied to enterprise HR data
 
@@ -32,6 +32,23 @@
 Python/Faker library, 5-10k rows, realistic HR attributes with quasi-identifiers (age, zip, department, gender, salary band)
 
 ## 2. Privacy Protection Stack
+
+### High-level: 
+Each step operates on the same 4,974-record suppressed dataset. DP is the final layer applied at query time, not at dataset transformation time.
+
+#### Transformation Step(via Generilization / Suppression)
+
+* K-anonymity transforms the dataset (4,974 records, 79 groups). It generalizes quasi-identifiers and suppresses records that can't satisfy k. This produces our working anonymized dataset (4,974 records). Everything after operates on this dataset, not the original.
+
+#### Validation Step
+
+*  L-diversity (verify group diversity)checks whether the k-anonymous groups are safe on the sensitive attribute. 
+
+*  T-closeness (verify distributional closeness) checks whether the distribution within each k-anonymous group is close to the global distribution.
+
+#### Query Step
+
+* Differential privacy (add noise to query outputs) operates at query time for interactive type differential privacy, which keeps the original dataset unchanged by transforming the data at the query time: For example when someone asks "what is the average salary in Engineering?" interactive DP adds noise to that answer. It doesn't change the stored dataset at all. This means we can technically apply DP without any of the previous steps but in a well designed system, we'd do both (anonymize the stored data and add noise to query results), because they protect against different attack vectors.
 
 ### 2.1- K-anonymity: 
 

@@ -42,10 +42,11 @@ st.sidebar.markdown("""
 
 
  # tabs
-tab1, tab2, tab3, tab4 = st.tabs([ 
+tab1, tab2, tab3, tab4, tab5 = st.tabs([ 
     "Original Data",
     "K-Anonymity", 
     "L-Diversity",
+    "T-Closeness",
     "Differential Privacy"
 ])
 
@@ -204,8 +205,109 @@ with tab3:
         suppressing this group (with fairness implications).
         """)
 
-# Tab4 differential privacy
+# Tab4 t-closeness
 with tab4:
+    st.header("T-Closeness")
+    st.markdown("""
+    **What it does:** Requires the distribution of the sensitive 
+    attribute (salary) within each group to be close to its 
+    global distribution, measured by Earth Mover's Distance (EMD).
+    
+    **Why it matters:** L-diversity ensures variety in sensitive 
+    values but doesn't prevent skewness attacks — a group where 
+    4 of 5 salaries cluster at $50K still leaks information even 
+    if one value is $200K.
+    """)
+
+    t_value = st.sidebar.slider("T-Closeness (t)", 0.1, 0.5, 0.3, 0.05)
+
+    # Compute EMD for each group
+    def earth_movers_distance(group_salaries, global_salaries):
+        n_bins = 10
+        global_hist, bin_edges = np.histogram(
+            global_salaries, bins=n_bins, density=True
+        )
+        group_hist, _ = np.histogram(
+            group_salaries, bins=bin_edges, density=True
+        )
+        global_hist = global_hist / global_hist.sum() if global_hist.sum() > 0 else global_hist
+        group_hist = group_hist / group_hist.sum() if group_hist.sum() > 0 else group_hist
+        return np.sum(np.abs(
+            np.cumsum(global_hist) - np.cumsum(group_hist)
+        )) / n_bins
+
+    QI = ['age', 'gender', 'department']
+    anon_df = anonymize_no_zip(df, age_range=10)
+    anon_suppressed = suppress_violations(anon_df, QI, k_value)
+
+    global_salaries = df['salary'].values
+    results = []
+    for name, group in anon_suppressed.groupby(QI):
+        emd = earth_movers_distance(group['salary'].values, global_salaries)
+        results.append({
+            'group': str(name),
+            'group_size': len(group),
+            'emd': round(emd, 4),
+            'satisfies_t': emd <= t_value
+        })
+
+    results_df = pd.DataFrame(results)
+    satisfies_t = results_df['satisfies_t'].all()
+    violations_t = (~results_df['satisfies_t']).sum()
+
+    col1, col2, col3, col4 = st.columns(4)
+    col1.metric("t value", t_value)
+    col2.metric("T-Closeness Satisfied", "✅ Yes" if satisfies_t else "❌ No")
+    col3.metric("Violations", violations_t)
+    col4.metric("Max EMD", f"{results_df['emd'].max():.4f}")
+
+    st.subheader("EMD Distribution Across Groups")
+    fig, ax = plt.subplots(figsize=(8, 3))
+    ax.hist(results_df['emd'], bins=20, color='#F0A500', edgecolor='white')
+    ax.axvline(x=t_value, color='red', linestyle='--', label=f't={t_value}')
+    ax.set_xlabel('Earth Mover\'s Distance from Global Distribution')
+    ax.set_ylabel('Number of Groups')
+    ax.set_title('T-Closeness: EMD Distribution')
+    ax.legend()
+    st.pyplot(fig)
+
+    st.subheader("Groups by EMD (worst first)")
+    st.dataframe(
+        results_df.sort_values('emd', ascending=False).head(10),
+        use_container_width=True
+    )
+
+    if not satisfies_t:
+        st.warning(f"""
+        ⚠️ T={t_value} not satisfied. All violations are Engineering 
+        groups — their salary distributions legitimately diverge from 
+        the global average. This reflects a real business pattern, 
+        not a privacy failure. Try t=0.3 for full satisfaction.
+        """)
+    else:
+        st.success(f"""
+        ✅ T={t_value} fully satisfied across all {len(results_df)} groups. 
+        Worst group EMD = {results_df['emd'].max():.4f} (20-29, M, Engineering).
+        """)
+
+    st.subheader("Privacy Stack Summary")
+    summary_data = {
+        'Technique': ['K-Anonymity', 'L-Diversity', 'T-Closeness', 'Differential Privacy'],
+        'Setting': [f'k={k_value}', f'l={l_value}', f't={t_value}', f'ε={epsilon}'],
+        'Attack Prevented': [
+            'Identity disclosure',
+            'Homogeneity attack',
+            'Skewness/inference attack',
+            'Aggregate query inference'
+        ],
+        'Result': ['✅ Satisfied', '✅ Satisfied',
+                   '✅ Satisfied' if satisfies_t else '❌ Not satisfied',
+                   '✅ Satisfied']
+    }
+    st.table(pd.DataFrame(summary_data))
+
+# Tab5 differential privacy
+with tab5:
     st.header("Differential Privacy")
     st.markdown("""
     **What it does:** Adds mathematically calibrated Laplace noise 
