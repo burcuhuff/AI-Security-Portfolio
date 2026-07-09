@@ -7,15 +7,15 @@ from pathlib import Path
 
 class AuditLogger:
     """
-    Tamper-evident audit logger for data access operations.
+    Audit logger for data access operations:
     
     Each log entry includes a hash of the previous entry,
     creating a chain where any modification to a past entry
-    breaks the chain — similar to a blockchain but lightweight.
+    breaks the chain, similar to a blockchain but lightweight.
     
     This directly implements the audit logging requirement
     from Privacy by Design and GDPR Article 30 (records of
-    processing activities).
+    processing activities - https://gdpr-info.eu/art-30-gdpr/).
     """
 
     def __init__(self, log_path="audit_system/audit_log.jsonl"):
