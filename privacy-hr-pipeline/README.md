@@ -243,3 +243,19 @@ Streamlit or Flask app showing original vs anonymized vs differentially-private 
 <img width="300" height="300" alt="Tab4 (t-closeness)" src="https://github.com/burcuhuff/AI-Security-Portfolio/blob/main/scripts/Security+701/images/Dashboard-Tabs4-5.png?raw=true">
 <img width="300" height="300" alt="Tab5 (DP)" src="https://github.com/burcuhuff/AI-Security-Portfolio/blob/main/scripts/Security+701/images/Dashboard-Tab4.png?raw=true"> 
 </p>
+
+## While Privacy-Audit-System framework is being built:
+
+### Tie-In Plan
+privacy-audit-system can monitor it:
+  - Track Query Footprints: When an analyst requests a slice of this data (df.groupby('department')['salary'].mean()), the audit system can log the action.
+  - Detect Linkage Attacks: The audit logger can flag an alert if someone runs a query looking for high risk combinations (like filtering down to a single zip_code + age + gender), which signals an attempt to isolate an individual.
+
+Next step since the raw dataset ready, handling the anonymization phase into the pipeline. 
+  - implement Generalization (grouping ages into brackets like 35-40 and masking zip codes to 577xx)?- add Laplace/Gaussian Noise to the salary aggregations for Differential Privacy?
+
+Phase 1: Structural Logging: Create a Python class or module in privacy-audit-system that captures basic metadata every time a data operation happens:Timestamp & User/Process ID (faker or system strings)Target Dataset (hr_dataset.csv)Operation Type (READ_RAW, AGGREGATE, EXPORT) 
+
+Phase 2: Quasi-Identifier Monitoring (Build During Anonymization): Expand the logger to look at what columns are being touched. It should trigger warning flags if a query explicitly isolates dangerous combinations:High-Risk Flag: Triggers if a query filters down by zip_code AND age AND gender at the same time without grouping or masking. 
+
+Phase 3: Privacy Budget Tracking (Build During Differential Privacy): When I finally write the DP mechanisms, pass the privacy parameters to the audit log:Epsilon (ε) Spent: Track the cumulative privacy degradation across queries. Noise Type Added -> Log whether Laplace or Gaussian noise was applied to the resulting output.
