@@ -1,2 +1,19 @@
-.DS_Store
-.ipynb_checkpoints/
+# --- Python & Environments ---
+**/__pycache__/
+**/*.pyc
+**/venv/
+**/.venv/
+**/env/
+
+# --- Jupyter Notebooks ---
+**/.ipynb_checkpoints/
+
+# --- Data & Logs ---
+**/*.csv
+**/*.jsonl
+**/*.log
+
+# --- Security & Secrets ---
+**/.env
+**/*.pem
+**/*.key
