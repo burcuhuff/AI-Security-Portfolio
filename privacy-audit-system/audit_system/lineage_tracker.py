@@ -7,7 +7,39 @@ The LineageTracker class is designed to be extended with specific backend
 connectivity and storage logic, allowing for flexible integration with
 different data management systems.
 
+Adding data design approach with dataclasses for immutable data artifacts and lineage events, ensuring
+that once created, these objects cannot be modified, preserving the integrity of the lineage information.
+
 """
+from __future__ import annotations
+
+from dataclasses import dataclass
+from types import MappingProxyType
+from typing import Any
+
+@dataclass (frozen=True)
+class DataArtifact:
+    artifact_id: str
+    name: str
+    version: int
+    record_count: int
+    fields: tuple[str]
+    checksum: str
+    created_at: str
+
+@dataclass (frozen=True)
+class LineageEvent:
+    event_id: str
+    operation: str
+    input_artifact_ids: tuple[str]
+    output_artifact_id: str
+    fields_read: tuple[str]
+    fields_modified: tuple[str]
+    fields_added: tuple[str]
+    fields_removed: tuple[str]
+    parameters: MappingProxyType[str, Any]
+    audit_event_id: str | None
+    timestamp: str
 
 class LineageTracker:
     def register_artifact(self, artifact_id: str, metadata: dict) -> None:
