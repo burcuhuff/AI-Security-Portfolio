@@ -4,7 +4,7 @@ from dataclasses import dataclass, asdict
 from types import MappingProxyType
 from typing import Any
 from faker import Faker
-
+from datetime import datetime, timezone
 import json
 
 """
@@ -28,10 +28,39 @@ rootdir: /Users/burcu/github/ai-security-portfolio/privacy-audit-system/audit_sy
 plugins: Faker-40.28.1
 collected 1 item                                                                                   
 
-test_lineage_tracker.py .                                                                    [100%]
+test_lineage_tracker.py 
+--- DEBUG: SERIALIZED LINEAGE LOG ENTRY ---
+{
+  "event_id": "bb41f0d1-b1fd-4b27-8679-7c76ca6391d5",
+  "operation": "ANONYMIZATION_RUN",
+  "input_artifact_ids": [
+    "b839f619-c964-4e98-8872-8864261ddc28"
+  ],
+  "output_artifact_id": "16434b1c-0e1e-4c7a-9df2-24b60375a2ac",
+  "fields_read": [
+    "age",
+    "zip_code",
+    "salary"
+  ],
+  "fields_modified": [
+    "zip_code",
+    "salary"
+  ],
+  "fields_added": [],
+  "fields_removed": [
+    "employee_id"
+  ],
+  "parameters": {
+    "privacy_budget_epsilon": 0.1
+  },
+  "audit_event_id": "332db45b-ac7a-4215-85ad-b9661c61a32d",
+  "timestamp": "2026-07-11T00:30:15.305452+00:00"
+}
+-------------------------------------------
 
-======================================== 1 passed in 0.07s =========================================
-(venv) burcu@Burcus-MacBook-Pro audit_system % 
+.
+
+======================================== 1 passed in 0.11s =========================================
 
 
 
@@ -95,9 +124,9 @@ class LineageTracker:
 
 
     def log_access(self, user_id, action, target_dataset):
-        """Records a single structural data access event."""
+        """Records a single structural data access event with real system information."""
         event = {
-            "timestamp": fake.iso8601(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "user_id": user_id,
             "action": action,
             "target_dataset": target_dataset

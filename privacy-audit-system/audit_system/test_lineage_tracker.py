@@ -1,6 +1,9 @@
+from datetime import datetime, timezone as datetime_timezone
 import os
 import json
+from time import timezone
 import pytest
+import re
 from faker import Faker
 from types import MappingProxyType
 from lineage_tracker import LineageTracker, DataArtifact, LineageEvent
@@ -40,7 +43,7 @@ def test_log_creation_on_data_access():
         fields_removed=("employee_id",),
         parameters=params,
         audit_event_id=fake.uuid4(),
-        timestamp=fake.iso8601()
+        timestamp=datetime.now(datetime_timezone.utc).isoformat()
     )
 
     #  log the lineage event
@@ -55,8 +58,17 @@ def test_log_creation_on_data_access():
     assert len(log_lines) == 1
     
     logged_data = json.loads(log_lines[0])
+
+    print("\n--- DEBUG: SERIALIZED LINEAGE LOG ENTRY ---")
+    print(json.dumps(logged_data, indent=2))
+    print("-------------------------------------------\n")
+
     assert logged_data["event_id"] == mock_event_id
     assert logged_data["operation"] == "ANONYMIZATION_RUN"
     assert logged_data["fields_read"] == ["age", "zip_code", "salary"]
     # MappingProxyType serializes natively into standard JSON dicts
     assert logged_data["parameters"]["privacy_budget_epsilon"] == 0.1
+    # Assert: Instead of checking a fake match, verify it is a valid ISO timestamp format
+    assert "timestamp" in logged_data
+    iso_regex = r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}"
+    assert re.match(iso_regex, logged_data["timestamp"]), "Timestamp is not in valid ISO 8601 format"
