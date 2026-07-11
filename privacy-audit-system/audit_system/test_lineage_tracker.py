@@ -1,3 +1,4 @@
+from lineage_tracker import DataArtifact
 from datetime import datetime, timezone as datetime_timezone
 import os
 import json
@@ -72,3 +73,42 @@ def test_log_creation_on_data_access():
     assert "timestamp" in logged_data
     iso_regex = r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}"
     assert re.match(iso_regex, logged_data["timestamp"]), "Timestamp is not in valid ISO 8601 format"
+
+
+def test_register_artifact_stores_metadata():
+    """Verify that registering a data asset version correctly writes its metadata to the log."""
+    tracker = LineageTracker(log_path=TEST_LOG_PATH)
+    
+    # build a mock snapshot of a dataset version
+    mock_artifact_id = fake.uuid4()
+    mock_name = "hr_dataset.csv"
+    
+    artifact = DataArtifact(
+        artifact_id=mock_artifact_id,
+        name=mock_name,
+        version=1,
+        record_count=5000,
+        fields=("employee_id", "age", "gender", "zip_code", "salary"),
+        checksum=fake.sha256(),
+        created_at=datetime.now(datetime_timezone.utc).isoformat()
+    )
+
+    # run registration method
+    tracker.register_artifact(artifact)
+
+    # confirm the log entry captures the structural metadata
+    assert os.path.exists(TEST_LOG_PATH), "Artifact registration file was not created."
+    with open(TEST_LOG_PATH, "r") as f:
+        log_lines = f.readlines()
+        
+    assert len(log_lines) == 1
+    logged_data = json.loads(log_lines[0])
+    
+    print("\n--- DEBUG: REGISTERED ARTIFACT METADATA ---")
+    print(json.dumps(logged_data, indent=2))
+    print("-------------------------------------------\n")
+    
+    assert logged_data["artifact_id"] == mock_artifact_id
+    assert logged_data["name"] == mock_name
+    assert logged_data["record_count"] == 5000
+    assert logged_data["fields"] == ["employee_id", "age", "gender", "zip_code", "salary"]

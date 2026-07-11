@@ -19,24 +19,31 @@ different data management systems.
 Adding data design approach with dataclasses for immutable data artifacts and lineage events, ensuring
 that once created, these objects cannot be modified, preserving the integrity of the lineage information.
 
-Adding TDD test: log creation on data access to verify that accessing a dataset correctly writes a structured JSONL entry, 
-ensuring that the audit log file is created and contains valid data.
-(venv) burcu@Burcus-MacBook-Pro audit_system % pytest test_lineage_tracker.py
+TDD Cases:
+Adding log_access: log creation on data access to verify that accessing a dataset correctly writes a structured 
+JSONL entry, ensuring that the audit log file is created and contains valid data.
+
+Adding register_artifact: store DataArtifact metadata to verify that registering a data artifact 
+writes a structured JSONL entry, ensuring that the audit log file is created and contains valid data. 
+DataArtifact schema translates into JSON, the list array format for tracking the data fields 
+and mock SHA-256 hash checksum string.
+
+(venv) burcu@Burcus-MacBook-Pro audit_system % pytest -s test_lineage_tracker.py
 ======================================= test session starts ========================================
 platform darwin -- Python 3.13.7, pytest-9.1.1, pluggy-1.6.0
 rootdir: /Users/burcu/github/ai-security-portfolio/privacy-audit-system/audit_system
 plugins: Faker-40.28.1
-collected 1 item                                                                                   
+collected 2 items                                                                                  
 
 test_lineage_tracker.py 
 --- DEBUG: SERIALIZED LINEAGE LOG ENTRY ---
 {
-  "event_id": "bb41f0d1-b1fd-4b27-8679-7c76ca6391d5",
+  "event_id": "80f5e5ab-3f0d-4340-a26f-d21136cefaf3",
   "operation": "ANONYMIZATION_RUN",
   "input_artifact_ids": [
-    "b839f619-c964-4e98-8872-8864261ddc28"
+    "3d86754b-4b62-4f6a-80e5-4ccf689d511a"
   ],
-  "output_artifact_id": "16434b1c-0e1e-4c7a-9df2-24b60375a2ac",
+  "output_artifact_id": "64c150bc-037e-4700-bbf3-e34c4ccc0a08",
   "fields_read": [
     "age",
     "zip_code",
@@ -53,17 +60,31 @@ test_lineage_tracker.py
   "parameters": {
     "privacy_budget_epsilon": 0.1
   },
-  "audit_event_id": "332db45b-ac7a-4215-85ad-b9661c61a32d",
-  "timestamp": "2026-07-11T00:30:15.305452+00:00"
+  "audit_event_id": "904167e7-19cd-4c97-ac50-e3d891d27ec9",
+  "timestamp": "2026-07-11T18:46:54.358386+00:00"
 }
 -------------------------------------------
-
 .
-
-======================================== 1 passed in 0.11s =========================================
-
-
-
+--- DEBUG: REGISTERED ARTIFACT METADATA ---
+{
+  "artifact_id": "fc71246e-5d06-44fb-b9f5-fa19b587167e",
+  "name": "hr_dataset.csv",
+  "version": 1,
+  "record_count": 5000,
+  "fields": [
+    "employee_id",
+    "age",
+    "gender",
+    "zip_code",
+    "salary"
+  ],
+  "checksum": "3c51a945c5a650edd08ab5d8c6f3e9298e02af44083e94fad4737e77f8443c6d",
+  "created_at": "2026-07-11T18:46:54.360697+00:00"
+}
+-------------------------------------------
+.
+======================================== 2 passed in 0.15s =========================================
+(venv) burcu@Burcus-MacBook-Pro audit_system % 
 """
 
 @dataclass (frozen=True)
@@ -135,8 +156,13 @@ class LineageTracker:
             f.write(json.dumps(event) + "\n")
         return event
     
-    def register_artifact(self, artifact_id: str, metadata: dict) -> None:
-        pass
+    def register_artifact(self, artifact: DataArtifact) -> None:
+        """Registers a data asset version snapshot to the lineage logs."""
+        # DataArtifact types: strings, ints, standard tuples
+        artifact_dict = asdict(artifact)
+        
+        with open(self.log_path, "a") as f:
+            f.write(json.dumps(artifact_dict) + "\n")
 
     def record_transformation(self, transformation_id: str, inputs: list, outputs: list) -> None:
         pass
