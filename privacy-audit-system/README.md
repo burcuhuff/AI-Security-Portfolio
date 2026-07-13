@@ -1,26 +1,44 @@
 # Audit Logging and Data Lineage System
 
-Every time data is accessed, transformed, or queried in the HR pipeline, the system automatically records:
--  who accessed it, 
-- what operation was performed, 
-- what data was touched, 
-- why (purpose), 
-- and when
+The audit logging and data lineage system records structured metadata about
+data access and transformation activity in the HR privacy pipeline.
 
-It also tracks the lineage of every transformation, so we can answer "where did this anonymized record come from and what happened to it?"
+Audit events capture:
+
+- who accessed the data
+- what operation was performed
+- which dataset or fields were involved
+- the stated purpose of the operation
+- when the operation occurred
+
+Lineage events capture how data artifacts change across privacy-preserving
+operations. Together, these records are designed to answer questions such as:
+
+> Which source artifact produced this anonymized dataset, what transformations
+> were applied, and which audit event was associated with the operation?
 
 ## Lineage Tracker
 
-Explains how a dataset or field reached to its current state.
+The lineage tracker explains how a dataset or field reached its current state.
 
-It tracks: 
-- the input dataset or artifact
+It records:
+
+- input data artifacts
+- output data artifacts
 - the transformation performed
-- the output dataset or artifact
-- which fields were read, modified, added, or removed
-- the parent–child relationship between transformations
-- basic metadata such as timestamp, record count, and parameters
-- the related audit-event ID from audit_logger.py
+- fields that were read, modified, added, or removed
+- transformation parameters
+- artifact metadata, including version, record count, and checksum
+- parent-child relationships between artifacts
+- timestamps
+- the related audit event ID from `audit_logger.py`
 
-Tracking is done seperately on artifacts and transformation events. This is because one artifact may pass through several operations, and one operation may eventually have multiple inputs.
+### Record Types
 
+Each JSONL record includes an `entry_type` discriminator so that artifact,
+access, and transformation records can be identified reliably.
+
+```python
+ENTRY_TYPE_ARTIFACT = "artifact"
+ENTRY_TYPE_TRANSFORMATION = "transformation"
+ENTRY_TYPE_ACCESS = "access"
