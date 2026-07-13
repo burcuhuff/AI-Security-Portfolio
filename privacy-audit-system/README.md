@@ -33,6 +33,12 @@ It records:
 - timestamps
 - the related audit event ID from `audit_logger.py`
 
+The current implementation provides artifact-level lineage. A `DataArtifact`<br>
+represents an immutable, versioned snapshot of a dataset, while a<br>
+`LineageEvent` records the transformation connecting one or more input<br>
+artifacts to an output artifact.
+
+
 ### Record Types
 
 Each JSONL record includes an `entry_type` discriminator so that artifact,
@@ -42,3 +48,77 @@ access, and transformation records can be identified reliably.
 ENTRY_TYPE_ARTIFACT = "artifact"
 ENTRY_TYPE_TRANSFORMATION = "transformation"
 ENTRY_TYPE_ACCESS = "access"
+```
+This design supports dataset-level provenance, transformation history, field
+impact tracking, and audit-event linkage. It does not currently retain
+row-level mappings between original and anonymized records or continuously
+observe operations performed outside the instrumented pipeline.
+
+## Lineage Graph
+
+| Concept        | Meaning                                                 |
+| -------------- | ------------------------------------------------------- |
+| `DataArtifact` | A versioned state or snapshot of data                   |
+| `LineageEvent` | The transformation relationship between artifact states |
+
+```
+Artifact A: raw HR data
+        |
+        | GENERALIZE age
+        v
+Artifact B: generalized HR data
+        |
+        | SUPPRESS groups smaller than k=5
+        v
+Artifact C: k-anonymous HR data
+```
+- The rtifacts are nodes
+
+- The transformation events are the edges
+
+- Therefore the LineageEvent identified in the project doesn't represent the data itseld. It represents the operation that caused one artifact state to become another.
+
+```pyton
+LineageEvent(
+    operation="GENERALIZE",
+    input_artifact_ids=("artifact-a",),
+    output_artifact_id="artifact-b",
+    fields_read=("age",),
+    fields_modified=("age",),
+    parameters=MappingProxyType({
+        "age_range": 10,
+    }),
+)
+```
+
+
+- Artifact lets us distinguish between different states of a dataset and verify that a particular transformation used the expected version:
+```
+version
+record_count
+fields
+checksum
+created_at
+``` 
+
+```
+artifact
+{
+  "entry_type": "artifact",
+  "artifact_id": "de0d77d3-2620-4810-b1a1-49d6d65ce58a",
+  "name": "hr_dataset.csv",
+  "version": 1,
+  "record_count": 5000,
+  "fields": [
+    "employee_id",
+    "age",
+    "gender",
+    "zip_code",
+    "salary"
+  ],
+  "checksum": "7bbcbff5802cab6e7055e6a47d23e779b70b0fbb5bfabebf68177931953c13fe",
+  "created_at": "2026-07-13T19:32:57.543387+00:00"
+}
+```
+
+
