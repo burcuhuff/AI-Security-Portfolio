@@ -49,6 +49,27 @@ class LineageEvent:
 class LineageTracker:
     def __init__(self, log_path="audit_log.jsonl"):
         self.log_path = log_path
+    
+    def _read_entries(self) -> list[dict[str, Any]]:
+        """Reads all structured records from the lineage JSONL file."""
+        try:
+            with open(self.log_path, "r", encoding="utf-8") as log_file:
+                return [
+                    json.loads(line)
+                    for line in log_file
+                    if line.strip()
+                ]
+        except FileNotFoundError:
+            return []
+
+
+    def _registered_artifact_ids(self) -> set[str]:
+        """Returns all artifact IDs registered in the lineage log."""
+        return {
+            entry["artifact_id"]
+            for entry in self._read_entries()
+            if entry.get("entry_type") == ENTRY_TYPE_ARTIFACT
+        }
 
     def log_lineage_event(self, event: LineageEvent) -> None:
         """Records a single immutable lineage transaction to disk.
@@ -100,7 +121,8 @@ class LineageTracker:
     
     def register_artifact(self, artifact: DataArtifact) -> None:
         """Registers a data asset version snapshot to the lineage logs.
-        Unpack the dataclass into a dictionary **asdict(artifact) and add an entry_type for clarity in the log."""
+        Unpack the dataclass into a dictionary **asdict(artifact) and add an entry_type for clarity in the log.
+        This allows establishing the correct workflow and API, but it does not yet enforce that the artifact IDs are registered"""
         # DataArtifact types: strings, ints, standard tuples
         artifact_dict = {
             "entry_type": ENTRY_TYPE_ARTIFACT,
@@ -110,8 +132,27 @@ class LineageTracker:
         with open(self.log_path, "a", encoding="utf-8") as log_file:
             log_file.write(json.dumps(artifact_dict) + "\n")
         
-    def record_transformation(self, transformation_id: str, inputs: list, outputs: list) -> None:
-        pass
+    def record_transformation(self, event: LineageEvent) -> None:
+        """Validates and records a transformation between registered artifacts.
+        A failed transformation validation does not leave a partial transformation record in the JSONL log."""
+        registered_artifact_ids = self._registered_artifact_ids()
+
+        referenced_artifact_ids = {
+            *event.input_artifact_ids,
+            event.output_artifact_id,
+        }
+
+        missing_artifact_ids = (
+            referenced_artifact_ids - registered_artifact_ids
+        )
+
+        if missing_artifact_ids:
+            raise ValueError(
+                "Transformation references unregistered artifact IDs: "
+                f"{sorted(missing_artifact_ids)}"
+            )
+
+        self.log_lineage_event(event)
 
     def get_artifact_history(self, artifact_id: str) -> list:
         pass

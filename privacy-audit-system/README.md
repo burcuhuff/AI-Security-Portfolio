@@ -121,4 +121,40 @@ artifact
 }
 ```
 
+Milestone 1 — Typed JSONL records
 
+-> artifact
+-> access
+-> transformation
+
+Milestone 2 — Validated transformation relationships towards graph compatibility
+```
+register_artifact()
+        ↓
+artifact IDs become valid lineage nodes
+        ↓
+record_transformation()
+        ↓
+validate all references
+        ↓
+log_lineage_event()
+        ↓
+persist the relationship as JSONL
+```
+
+Milestone 3 — Lineage queries
+- get_artifact_history()
+- get_upstream_lineage()
+- get_downstream_lineage()
+
+Milestone 4 — Integrity validation
+- unknown references
+- duplicate identifiers
+- malformed records
+- cycles
+- orphan artifacts, where relevant
+
+Milestone 5 — Export and visualization
+- export_lineage()
+- nodes-and-relationships JSON
+- optional Mermaid or Graphviz visualization
