@@ -359,3 +359,467 @@ def test_record_transformation_rejects_unregistered_input_artifact():
 
     assert len(entries) == 1
     assert entries[0]["entry_type"] == "artifact"
+
+"""
+Milestone III: Lineage Queries
+    1. Get direct history for an artifact
+    2. Get upstream lineage
+    3. Get downstream lineage
+    4. Verify integrity of the lineage graph Happy Path
+"""
+
+def test_get_artifact_history_returns_directly_related_entries():
+    """Verify that artifact history returns the artifact and transformations directly involving it."""
+    tracker = LineageTracker(log_path=TEST_LOG_PATH)
+
+    created_at = datetime.now(datetime_timezone.utc).isoformat()
+
+    input_artifact = DataArtifact(
+        artifact_id=fake.uuid4(),
+        name="raw_hr_dataset.csv",
+        version=1,
+        record_count=5000,
+        fields=(
+            "employee_id",
+            "age",
+            "gender",
+            "zip_code",
+            "salary",
+        ),
+        checksum=fake.sha256(),
+        created_at=created_at,
+    )
+
+    output_artifact = DataArtifact(
+        artifact_id=fake.uuid4(),
+        name="anonymized_hr_dataset.csv",
+        version=2,
+        record_count=4974,
+        fields=(
+            "age",
+            "gender",
+            "zip_code",
+            "salary",
+        ),
+        checksum=fake.sha256(),
+        created_at=created_at,
+    )
+
+    tracker.register_artifact(input_artifact)
+    tracker.register_artifact(output_artifact)
+
+    event = LineageEvent(
+        event_id=fake.uuid4(),
+        operation="ANONYMIZATION_RUN",
+        input_artifact_ids=(input_artifact.artifact_id,),
+        output_artifact_id=output_artifact.artifact_id,
+        fields_read=(
+            "employee_id",
+            "age",
+            "gender",
+            "zip_code",
+            "salary",
+        ),
+        fields_modified=(
+            "age",
+            "zip_code",
+            "salary",
+        ),
+        fields_added=(),
+        fields_removed=("employee_id",),
+        parameters=MappingProxyType({"k": 5}),
+        audit_event_id=fake.uuid4(),
+        timestamp=datetime.now(datetime_timezone.utc).isoformat(),
+    )
+
+    tracker.record_transformation(event)
+
+    history = tracker.get_artifact_history(
+        output_artifact.artifact_id
+    )
+
+    assert len(history) == 2
+
+    assert [entry["entry_type"] for entry in history] == [
+        "artifact",
+        "transformation",
+    ]
+
+    assert history[0]["artifact_id"] == output_artifact.artifact_id
+    assert (
+        history[1]["output_artifact_id"]
+        == output_artifact.artifact_id
+    )
+
+def test_get_artifact_history_includes_transformation_where_artifact_is_input():
+        """Verify that history includes transformations that consume the artifact."""
+        tracker = LineageTracker(log_path=TEST_LOG_PATH)
+
+        created_at = datetime.now(datetime_timezone.utc).isoformat()
+
+        input_artifact = DataArtifact(
+            artifact_id=fake.uuid4(),
+            name="raw_hr_dataset.csv",
+            version=1,
+            record_count=5000,
+            fields=("employee_id", "age", "salary"),
+            checksum=fake.sha256(),
+            created_at=created_at,
+        )
+
+        output_artifact = DataArtifact(
+            artifact_id=fake.uuid4(),
+            name="anonymized_hr_dataset.csv",
+            version=2,
+            record_count=4974,
+            fields=("age", "salary"),
+            checksum=fake.sha256(),
+            created_at=created_at,
+        )
+
+        tracker.register_artifact(input_artifact)
+        tracker.register_artifact(output_artifact)
+
+        event = LineageEvent(
+            event_id=fake.uuid4(),
+            operation="ANONYMIZATION_RUN",
+            input_artifact_ids=(input_artifact.artifact_id,),
+            output_artifact_id=output_artifact.artifact_id,
+            fields_read=("employee_id", "age", "salary"),
+            fields_modified=("age", "salary"),
+            fields_added=(),
+            fields_removed=("employee_id",),
+            parameters=MappingProxyType({"k": 5}),
+            audit_event_id=fake.uuid4(),
+            timestamp=datetime.now(datetime_timezone.utc).isoformat(),
+        )
+
+        tracker.record_transformation(event)
+
+        history = tracker.get_artifact_history(
+            input_artifact.artifact_id
+        )
+
+        assert len(history) == 2
+
+        assert [entry["entry_type"] for entry in history] == [
+            "artifact",
+            "transformation",
+        ]
+
+        assert history[0]["artifact_id"] == input_artifact.artifact_id
+        assert (
+            input_artifact.artifact_id
+            in history[1]["input_artifact_ids"]
+)
+
+def test_get_upstream_lineage_returns_recursive_ancestor_artifacts():
+    """Verify that upstream lineage recursively returns ancestor artifacts."""
+    tracker = LineageTracker(log_path=TEST_LOG_PATH)
+
+    created_at = datetime.now(datetime_timezone.utc).isoformat()
+
+    raw_artifact = DataArtifact(
+        artifact_id=fake.uuid4(),
+        name="raw_hr_dataset.csv",
+        version=1,
+        record_count=5000,
+        fields=("employee_id", "age", "salary"),
+        checksum=fake.sha256(),
+        created_at=created_at,
+    )
+
+    anonymized_artifact = DataArtifact(
+        artifact_id=fake.uuid4(),
+        name="anonymized_hr_dataset.csv",
+        version=2,
+        record_count=4974,
+        fields=("age", "salary"),
+        checksum=fake.sha256(),
+        created_at=created_at,
+    )
+
+    aggregated_artifact = DataArtifact(
+        artifact_id=fake.uuid4(),
+        name="aggregated_hr_dataset.csv",
+        version=3,
+        record_count=100,
+        fields=("age_group", "avg_salary"),
+        checksum=fake.sha256(),
+        created_at=created_at,
+    )
+
+    tracker.register_artifact(raw_artifact)
+    tracker.register_artifact(anonymized_artifact)
+    tracker.register_artifact(aggregated_artifact)
+
+    anonymization_event = LineageEvent(
+        event_id=fake.uuid4(),
+        operation="ANONYMIZATION_RUN",
+        input_artifact_ids=(raw_artifact.artifact_id,),
+        output_artifact_id=anonymized_artifact.artifact_id,
+        fields_read=("employee_id", "age", "salary"),
+        fields_modified=("age", "salary"),
+        fields_added=(),
+        fields_removed=("employee_id",),
+        parameters=MappingProxyType({"k": 5}),
+        audit_event_id=fake.uuid4(),
+        timestamp=datetime.now(datetime_timezone.utc).isoformat(),
+    )
+
+    aggregation_event = LineageEvent(
+        event_id=fake.uuid4(),
+        operation="AGGREGATION",
+        input_artifact_ids=(anonymized_artifact.artifact_id,),
+        output_artifact_id=aggregated_artifact.artifact_id,
+        fields_read=("age", "salary"),
+        fields_modified=(),
+        fields_added=("age_group", "avg_salary"),
+        fields_removed=("age", "salary"),
+        parameters=MappingProxyType({"group_by": "age_group"}),
+        audit_event_id=fake.uuid4(),
+        timestamp=datetime.now(datetime_timezone.utc).isoformat(),
+    )
+
+    tracker.record_transformation(anonymization_event)
+    tracker.record_transformation(aggregation_event)
+
+    upstream = tracker.get_upstream_lineage(
+        aggregated_artifact.artifact_id
+    )
+
+    assert len(upstream) == 2
+
+    assert [artifact["artifact_id"] for artifact in upstream] == [
+        anonymized_artifact.artifact_id,
+        raw_artifact.artifact_id,
+    ]
+
+def test_get_downstream_lineage_returns_recursive_descendant_artifacts():
+    """Verify that downstream lineage recursively returns descendant artifacts."""
+    tracker = LineageTracker(log_path=TEST_LOG_PATH)
+
+    created_at = datetime.now(datetime_timezone.utc).isoformat()
+
+    raw_artifact = DataArtifact(
+        artifact_id=fake.uuid4(),
+        name="raw_hr_dataset.csv",
+        version=1,
+        record_count=5000,
+        fields=("employee_id", "age", "salary"),
+        checksum=fake.sha256(),
+        created_at=created_at,
+    )
+
+    anonymized_artifact = DataArtifact(
+        artifact_id=fake.uuid4(),
+        name="anonymized_hr_dataset.csv",
+        version=2,
+        record_count=4974,
+        fields=("age", "salary"),
+        checksum=fake.sha256(),
+        created_at=created_at,
+    )
+
+    aggregated_artifact = DataArtifact(
+        artifact_id=fake.uuid4(),
+        name="aggregated_hr_dataset.csv",
+        version=3,
+        record_count=100,
+        fields=("age_group", "avg_salary"),
+        checksum=fake.sha256(),
+        created_at=created_at,
+    )
+
+    tracker.register_artifact(raw_artifact)
+    tracker.register_artifact(anonymized_artifact)
+    tracker.register_artifact(aggregated_artifact)
+
+    anonymization_event = LineageEvent(
+        event_id=fake.uuid4(),
+        operation="ANONYMIZATION_RUN",
+        input_artifact_ids=(raw_artifact.artifact_id,),
+        output_artifact_id=anonymized_artifact.artifact_id,
+        fields_read=("employee_id", "age", "salary"),
+        fields_modified=("age", "salary"),
+        fields_added=(),
+        fields_removed=("employee_id",),
+        parameters=MappingProxyType({"k": 5}),
+        audit_event_id=fake.uuid4(),
+        timestamp=datetime.now(datetime_timezone.utc).isoformat(),
+    )
+
+    aggregation_event = LineageEvent(
+        event_id=fake.uuid4(),
+        operation="AGGREGATION",
+        input_artifact_ids=(anonymized_artifact.artifact_id,),
+        output_artifact_id=aggregated_artifact.artifact_id,
+        fields_read=("age", "salary"),
+        fields_modified=(),
+        fields_added=("age_group", "avg_salary"),
+        fields_removed=("age", "salary"),
+        parameters=MappingProxyType({"group_by": "age_group"}),
+        audit_event_id=fake.uuid4(),
+        timestamp=datetime.now(datetime_timezone.utc).isoformat(),
+    )
+
+    tracker.record_transformation(anonymization_event)
+    tracker.record_transformation(aggregation_event)
+
+    downstream = tracker.get_downstream_lineage(
+        raw_artifact.artifact_id
+    )
+
+    assert len(downstream) == 2
+
+    assert [artifact["artifact_id"] for artifact in downstream] == [
+        anonymized_artifact.artifact_id,
+        aggregated_artifact.artifact_id,
+    ]
+
+def test_verify_integrity_returns_true_for_valid_lineage():
+    """Verify that a valid lineage graph passes integrity validation.
+    This is a ** HAPPY PATH ** proving valid lieage returns True"""
+    tracker = LineageTracker(log_path=TEST_LOG_PATH)
+
+    created_at = datetime.now(datetime_timezone.utc).isoformat()
+
+    raw_artifact = DataArtifact(
+        artifact_id=fake.uuid4(),
+        name="raw_hr_dataset.csv",
+        version=1,
+        record_count=5000,
+        fields=("employee_id", "age", "salary"),
+        checksum=fake.sha256(),
+        created_at=created_at,
+    )
+
+    anonymized_artifact = DataArtifact(
+        artifact_id=fake.uuid4(),
+        name="anonymized_hr_dataset.csv",
+        version=2,
+        record_count=4974,
+        fields=("age", "salary"),
+        checksum=fake.sha256(),
+        created_at=created_at,
+    )
+
+    tracker.register_artifact(raw_artifact)
+    tracker.register_artifact(anonymized_artifact)
+
+    event = LineageEvent(
+        event_id=fake.uuid4(),
+        operation="ANONYMIZATION_RUN",
+        input_artifact_ids=(raw_artifact.artifact_id,),
+        output_artifact_id=anonymized_artifact.artifact_id,
+        fields_read=("employee_id", "age", "salary"),
+        fields_modified=("age", "salary"),
+        fields_added=(),
+        fields_removed=("employee_id",),
+        parameters=MappingProxyType({"k": 5}),
+        audit_event_id=fake.uuid4(),
+        timestamp=datetime.now(datetime_timezone.utc).isoformat(),
+    )
+
+    tracker.record_transformation(event)
+
+    assert tracker.verify_integrity() is True
+
+
+"""
+Milestone IV: Lineage Integrity
+    1. Valid lineage passes integrity validation
+    2. Unknown artifact references fail integrity validation
+    3. Cycles fail integrity validation
+"""
+
+def test_verify_integrity_returns_false_for_unknown_artifact_reference():
+    """Verify that lineage referencing an unknown artifact fails integrity validation."""
+    tracker = LineageTracker(log_path=TEST_LOG_PATH)
+
+    artifact = DataArtifact(
+        artifact_id=fake.uuid4(),
+        name="raw_hr_dataset.csv",
+        version=1,
+        record_count=5000,
+        fields=("employee_id", "age", "salary"),
+        checksum=fake.sha256(),
+        created_at=datetime.now(datetime_timezone.utc).isoformat(),
+    )
+
+    tracker.register_artifact(artifact)
+
+    corrupted_transformation = {
+        "entry_type": "transformation",
+        "event_id": fake.uuid4(),
+        "operation": "ANONYMIZATION_RUN",
+        "input_artifact_ids": [artifact.artifact_id],
+        "output_artifact_id": fake.uuid4(),  # never registered
+    }
+
+    # Bypass record_transformation() deliberately to simulate
+    # malformed or externally corrupted persisted lineage.
+    with open(TEST_LOG_PATH, "a", encoding="utf-8") as log_file:
+        log_file.write(
+            json.dumps(corrupted_transformation) + "\n"
+        )
+
+    assert tracker.verify_integrity() is False
+
+def test_verify_integrity_returns_false_for_cycle():
+    """Verify that cyclic lineage fails integrity validation.
+    A->B->A
+    """
+    tracker = LineageTracker(log_path=TEST_LOG_PATH)
+
+    created_at = datetime.now(datetime_timezone.utc).isoformat()
+
+    artifact_a = DataArtifact(
+        artifact_id=fake.uuid4(),
+        name="artifact_a.csv",
+        version=1,
+        record_count=100,
+        fields=("id", "value"),
+        checksum=fake.sha256(),
+        created_at=created_at,
+    )
+
+    artifact_b = DataArtifact(
+        artifact_id=fake.uuid4(),
+        name="artifact_b.csv",
+        version=1,
+        record_count=100,
+        fields=("id", "value"),
+        checksum=fake.sha256(),
+        created_at=created_at,
+    )
+
+    tracker.register_artifact(artifact_a)
+    tracker.register_artifact(artifact_b)
+
+    transformation_a_to_b = {
+        "entry_type": "transformation",
+        "event_id": fake.uuid4(),
+        "operation": "STEP_A_TO_B",
+        "input_artifact_ids": [artifact_a.artifact_id],
+        "output_artifact_id": artifact_b.artifact_id,
+    }
+
+    transformation_b_to_a = {
+        "entry_type": "transformation",
+        "event_id": fake.uuid4(),
+        "operation": "STEP_B_TO_A",
+        "input_artifact_ids": [artifact_b.artifact_id],
+        "output_artifact_id": artifact_a.artifact_id,
+    }
+
+    # Write directly to simulate corrupted persisted lineage.
+    with open(TEST_LOG_PATH, "a", encoding="utf-8") as log_file:
+        log_file.write(
+            json.dumps(transformation_a_to_b) + "\n"
+        )
+        log_file.write(
+            json.dumps(transformation_b_to_a) + "\n"
+        )
+
+    assert tracker.verify_integrity() is False

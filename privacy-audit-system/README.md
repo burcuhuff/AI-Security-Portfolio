@@ -143,9 +143,72 @@ persist the relationship as JSONL
 ```
 
 Milestone 3 — Lineage queries
-- get_artifact_history()
-- get_upstream_lineage()
+- get_artifact_history() → direct records involving an artifact
+- get_upstream_lineage() → recursively walks backward through transformations to return ancestor artifacts
+- visited prevents infinite traversal if malformed lineage contains a cycle
 - get_downstream_lineage()
+- verify_integrity()
+
+<b>upstream</b>
+
+- current artifact → who produced me? → walk to inputs
+
+<b>downstream</b>
+
+- current artifact → who consumed me? → walk to outputs
+
+Since the ```input_artifact_ids``` is already a collection rather than a single ID, the implementation is for both straight and branched tracing:
+```
+raw_hr ─────┐
+            ├── combined_hr
+salary_hr ──┘
+```
+
+Three data structures needed from the JSONL log:
+```
+entries = self._read_entries()
+
+artifacts = {
+    entry["artifact_id"]: entry
+    for entry in entries
+    if entry.get("entry_type") == ENTRY_TYPE_ARTIFACT
+}
+
+transformations = [
+    entry
+    for entry in entries
+    if entry.get("entry_type") == ENTRY_TYPE_TRANSFORMATION
+]
+```
+Then the recursive helper is: 
+```
+walk(current artifact)
+
+    find transformations where:
+        output_artifact_id == current artifact
+
+    for each input artifact:
+        add that artifact to results
+        walk(input artifact)
+```
+
+So the shape is:
+```
+results = []
+visited = set()
+
+walk(start_artifact_id)
+
+return results
+```
+
+```Lineage integrity means:``` does the stored graph make structural sense?
+
+```verify_integrity()```  check three things: 
+- artifact/event IDs aren’t duplicated, 
+- transformations only reference known artifacts, and 
+- the graph doesn’t contain cycles. 
+
 
 Milestone 4 — Integrity validation
 - unknown references
@@ -153,6 +216,36 @@ Milestone 4 — Integrity validation
 - malformed records
 - cycles
 - orphan artifacts, where relevant
+
+rite-time validation
+→ prevents bad lineage from being created through the API.
+
+integrity validation
+→ checks whether persisted lineage can still be trusted later.
+
+Current state:
+- artifact registration (write events)
+- access logging (validate references)
+- validated transformation recording (direct history)
+- recursive upstream lineage (upstream traversal)
+- recursive downstream lineage (downstream traversal)
+- integrity checks for unknown references and cycles (structural integrity)
+
+Use Case Becomes:
+
+application-side lineage producer
+
+→ emits structured lineage JSONL
+
+→ Bronze/raw landing
+
+→ preserves what arrived
+
+→ Silver (to enforce trusted analytical structure on the persisted lineage events)
+
+→ validates and cleans lineage metadata before analysis
+
+Current tests: 12 passing
 
 Milestone 5 — Export and visualization
 - export_lineage()
