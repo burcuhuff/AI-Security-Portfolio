@@ -3,7 +3,7 @@ https://www.ischool.berkeley.edu/projects/2025/agent-iq-build-and-test-ai-agents
 
 > A security first backend architecture for safely executing untrusted, user submitted AI agent scripts in a shared multi-tenant environment.
 
-This is a personal documentation of the backend and security architecture I soley designed and built as part of the [Agent IQ capstone project](https://www.ischool.berkeley.edu/projects/2025/agent-iq-build-and-test-ai-agents-scale) at UC Berkeley's Master of Information and Data Science (MIDS) program, Fall 2025.
+This is a personal documentation of the backend and security architecture I soley designed and built as part of the [The Capstone project](https://www.ischool.berkeley.edu/programs/mids/capstone/2025c-fall/build-and-test-ai-agents-scale) at UC Berkeley's Master of Information and Data Science (MIDS) program, Fall 2025.
 
 Advising Faculty on reviews and feedback: Prof. Daniel Aranki
 
@@ -11,7 +11,7 @@ Advising Faculty on reviews and feedback: Prof. Daniel Aranki
 
 ## The problem I was solving
 
-Agent IQ is a platform where users upload and run their own AI agent scripts, testing how well agents navigate websites, complete tasks, and behave across different models and configurations.
+The capstone project, "Build and Test AI Agents for Scale", is a platform where users upload and run their own AI agent scripts, testing how well agents navigate websites, complete tasks, and behave across different models and configurations.
 
 The core security question I had to answer: **how do you let users run arbitrary, untrusted code in a shared platform without exposing your infrastructure, leaking credentials to user scripts, or allowing one user to access another user's data?**
 
@@ -166,9 +166,9 @@ Node.js · TypeScript · Docker · AWS EC2 · Amazon S3 · Auth0 · Databricks �
 
 ## Context
 
-This architecture was my individual contribution to the Agent IQ capstone. The security design, threat modeling, sandbox architecture, multi-tenancy, operational security policy, was entirely my own work.
+This architecture was my individual contribution to the capstone project. The security design, threat modeling, sandbox architecture, multi-tenancy, operational security policy, was entirely my own work.
 
-The broader platform included a frontend UI built by a teammate. The full project is documented at the [Berkeley I School project page](https://www.ischool.berkeley.edu/projects/2025/agent-iq-build-and-test-ai-agents-scale).
+The broader platform included a frontend UI built by a teammate. The full project is documented at the [Berkeley I School project page](https://www.ischool.berkeley.edu/programs/mids/capstone/2025c-fall/build-and-test-ai-agents-scale).
 
 - Deployed repo: [mqustar/agent-readiness-score-ui](https://github.com/mqustar/agent-readiness-score-ui)
 - Original Berkeley org repo: [UC-Berkeley-I-School/w210-fall25-agent-nav-sim](https://github.com/UC-Berkeley-I-School/w210-fall25-agent-nav-sim)
