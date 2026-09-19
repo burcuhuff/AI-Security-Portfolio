@@ -217,10 +217,10 @@ Milestone 4 — Integrity validation
 - cycles
 - orphan artifacts, where relevant
 
-rite-time validation
+write-time validation (producer-side validation)
 → prevents bad lineage from being created through the API.
 
-integrity validation
+integrity validation (downstream Silver validation)
 → checks whether persisted lineage can still be trusted later.
 
 Current state:

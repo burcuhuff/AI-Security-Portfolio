@@ -228,6 +228,26 @@ The privacy engineering pipeline successfully satisfied all targeted privacy gua
 - The complete privacy stack (**k-anonymity → l-diversity → t-closeness → differential privacy**) provided layered protection against identity disclosure, attribute disclosure, inference, and aggregate query attacks with minimal utility loss.
 - The primary engineering tradeoff was balancing stronger privacy guarantees with data utility and fairness. Thresholds were selected to avoid disproportionately affecting minority groups or distorting legitimate business patterns while still satisfying each privacy criterion.
 
+
+
+    [k-Anonymity]  Blends you in a crowd       --->        
+    
+    [l-Diversity]   Makes the crowd diverse    (Fixes Homogeneity Leak)    --->         
+    
+    [t-Closeness] Matches the global vibe (Fixes Distribution Leak)
+
+                  
+
+                     
+
+
+| Technique | Focuses On... | Golden Rule | Weakness |
+| :--- | :--- | :--- | :--- |
+| **k-Anonymity** | Quasi-identifiers | "At least k people look exactly like me." | Vulnerable to group homogeneity. |
+| **l-Diversity** | Sensitive attributes | "The crowd must have l different secrets." | Vulnerable to distribution skewness/similarity. |
+| **t-Closeness** | Attribute distribution | "The group's mix must mirror the global pool." | Destroys data utility for niche analysis. |
+
+
 ## 4. Dashboard
 
 Streamlit or Flask app showing original vs anonymized vs differentially-private results side by side. 

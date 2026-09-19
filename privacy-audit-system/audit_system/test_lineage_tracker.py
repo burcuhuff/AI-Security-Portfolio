@@ -365,7 +365,7 @@ Milestone III: Lineage Queries
     1. Get direct history for an artifact
     2. Get upstream lineage
     3. Get downstream lineage
-    4. Verify integrity of the lineage graph Happy Path
+    4. Valid lineage passes integrity validation (happy path)
 """
 
 def test_get_artifact_history_returns_directly_related_entries():
@@ -728,9 +728,8 @@ def test_verify_integrity_returns_true_for_valid_lineage():
 
 """
 Milestone IV: Lineage Integrity
-    1. Valid lineage passes integrity validation
-    2. Unknown artifact references fail integrity validation
-    3. Cycles fail integrity validation
+    1. Unknown artifact references fail integrity validation
+    2. Cycles fail integrity validation
 """
 
 def test_verify_integrity_returns_false_for_unknown_artifact_reference():
