@@ -5,6 +5,14 @@
 **/.venv/
 **/env/
 
+# --- Python tooling ---
+**/.pytest_cache/
+**/.mypy_cache/
+**/.ruff_cache/
+**/.coverage
+**/htmlcov/
+**/*.egg-info/
+
 # --- Jupyter Notebooks ---
 **/.ipynb_checkpoints/
 
@@ -17,3 +25,7 @@
 **/.env
 **/*.pem
 **/*.key
+
+# --- IDE / OS ---
+**/.vscode/
+**/.DS_Store
