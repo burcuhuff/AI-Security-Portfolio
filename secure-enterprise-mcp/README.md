@@ -2,6 +2,22 @@
 
 A small security focused MCP project that demonstrates how enterprise tools can be exposed through Model Context Protocol while enforcing identity, least privilege, authorization, and declarative governance controls.
 
+[Part 1 - MCP Setup](DESIGN.md#part-1---mcp-application-setup)
+
+[Part 2 - Enterprise Trust Boundary](DESIGN.md#part-2---enterprise-trust-boundry)
+
+[Part 3 - Audit and Security Observability](DESIGN.md#part-3---audit-and-security-observability)
+
+Work-In-Progress For:
+
+- PART 1 - MCP Application Setup
+- PART 2 - Identity, Policy and Authorization
+- PART 3 - Enterprise Trust Boundary
+- PART 4 - Audit and Security Observability
+- PART 5 - Inbound Security: Quarantine and Sandboxing
+- PART 6 - Outbound Security: Export and Approval
+- PART 7 - Prompt Injection and Exfiltration Testing
+
 ## Overview
 
 This project implements a local MCP client and server that expose document search and document read capabilities. The focus is not just MCP connectivity, but the security controls around tool access.

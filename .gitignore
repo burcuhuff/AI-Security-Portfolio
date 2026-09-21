@@ -29,3 +29,7 @@
 # --- IDE / OS ---
 **/.vscode/
 **/.DS_Store
+
+# --- Secure Enterprise MCP quarantine ---
+secure-enterprise-mcp/data/quarantine/*
+!secure-enterprise-mcp/data/quarantine/README.md

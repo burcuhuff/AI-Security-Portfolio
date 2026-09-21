@@ -1,4 +1,12 @@
-## MCP SETUP: Working MCP client/server for tool discovery with search and read documents
+# PART 1 - MCP Application Setup
+
+Working MCP client/server for tool discovery with search and read documents
+
+#### Inbound / Ingress Boundary
+External → Quarantine → Inspection → Trusted
+
+#### Outbound / Egress Boundary
+Trusted → Export Controls → Approval → External
 
 ### secure-enterprise-mcp/mcl_server.py
 
@@ -473,3 +481,177 @@ type='text' text="Error executing tool read_enterprise_document: Access denied. 
     documents.read
 
 >> This project uses simulated authentication to focus on MCP authorization architecture. Production identity would be established using validated OAuth/OIDC/Entra tokens rather than the DEMO_USER environment variable.
+
+
+# PART 2 - ENTERPRISE TRUST BOUNDRY
+
+I modeled both ingress and egress around the MCP boundary. Untrusted external content enters quarantine and is inspected before promotion, while outbound document transfer requires separate export authorization and explicit approval.
+
+1. Ingest_external_document (sandbox/quarantine).
+
+2. Prompt-injection test with a deliberately hostile document into quarantine and show that untrusted content cannot bypass authorization or directly trigger tools.
+
+3. Promotion into trusted storage (after validation/approval).
+
+4. Outbound side with separate export scope + approval (send_document_external).
+
+
+
+
+                        ENTERPRISE TRUST BOUNDARY
+
+            INBOUND                              OUTBOUND
+
+    External source                         Trusted document
+        │                                       │
+        ▼                                       ▼
+    ingest_external_document         send_document_external
+        │                                       │
+    authorization                         authorization
+        │                                       │
+    approval                              approval
+        │                                       │
+    quarantine                            DLP / policy checks
+        │                                       │
+    sandbox inspection                    simulated transfer
+        │                                       │
+    validation                                 external
+        │
+    trusted repository
+
+
+### Least privilege case:
+
+    document_operator
+        search
+        read
+
+    ingest_operator
+        search
+        read
+        ingest
+
+    export_operator
+        search
+        read
+        export
+
+EXTERNAL / UNTRUSTED
+        │
+        ▼
+ingest_external_document
+        │
+        ├── audit: request received
+        ▼
+authorization
+        │
+        ├── audit: allowed / denied
+        ▼
+quarantine
+        │
+        ├── audit: quarantined
+        ▼
+sandbox inspection
+        │
+        ├── audit: passed / failed
+        ▼
+approval / promotion
+        │
+        ├── audit: approved / denied
+        ▼
+INTERNAL / TRUSTED
+
+>> `server/security/trust_boundary.py` is the central denfinition of trust zones (therefore server/tools/read_document.py and search_documents.py uhave been updated to delegate the boundary enforcement to trust_boundary.py)
+>> this segration also ensures that the two trusted tools supported with this project cannot accidentally wander into `data/quarantine/`
+
+                            TRUST BOUNDARY
+
+    UNTRUSTED                                TRUSTED
+    ─────────                                ───────
+
+    data/quarantine/                         data/trusted/
+    untrusted_test.txt                       normal_document.txt
+        │                                        │
+        │                                        │
+        └─────── X search/read cannot cross ─────┤
+                                                    │
+                                            MCP search/read
+
+### What's the point?
+- The agent doesn't need to “remember” not to read quarantine.
+
+- The client doesn't need to behave correctly.
+
+- The LLM doesn't need to recognize that the document is dangerous.
+
+- The architecture prevents trusted document tools from reaching that trust zone.
+
+
+# PART 3 - Audit and Security Observability
+
+                        AUDIT / OBSERVABILITY
+                                │
+    External ──► Ingress ──► Trusted ──► Egress ──► External
+                │            │           │
+                └────────────┴───────────┘
+                        security events
+
+    Record types:
+        authorization allowed / denied
+        document received
+        quarantined
+        inspection passed / failed
+        promotion approved / denied
+        export requested
+        export approved / blocked
+
+>> audit logging → sensitive outbound action → human approval → prompt-injection/exfiltration test → threat model
+
+### Audit package
+    server/
+    └── audit/
+        ├── __init__.py
+        └── logger.py
+
+### secure-enterprise-mcp/server/audit/logger.py
+
+```
+def log_tool_event(
+    *,
+    user_id: str,
+    tool_name: str,
+    outcome: str,
+    details: dict[str, Any] | None = None,
+) -> None:
+```
+>> Structured JSONL, not free-form strings. That makes the events usable later for SIEM ingestion, analytics, incident review, or policy monitoring. `details` rather than automatically serializing the entire MCP request. We do not want audit logging to become a second data-exfiltration channel by dumping document content, prompts, tokens, or credentials into logs.
+
+
+    log_tool_event(...)
+        ↓
+    structured JSONL event written
+        ↓
+    logs/mcp_audit.jsonl
+
+
+### Wiring auditin into authorization flow:
+
+- Updated authorization.py to accept principal ID and write an audit event for outcomes (allowed and denied).
+- Updated mcp_server.py with one extra argument (`CURRENT_USER.user_id`) -  for both search and read. 
+
+    authorize_tool(
+        "search_enterprise_documents",
+        CURRENT_USER.scopes,
+    )
+
+    authorize_tool(
+        "search_enterprise_documents",
+        `CURRENT_USER.user_id`,
+        CURRENT_USER.scopes,
+    )
+
+    authorize_tool(
+        "read_enterprise_document",
+        `CURRENT_USER.user_id`,
+        CURRENT_USER.scopes,
+    )

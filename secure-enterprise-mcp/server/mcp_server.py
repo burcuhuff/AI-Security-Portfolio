@@ -27,6 +27,7 @@ def search_enterprise_documents(query: str) -> list[dict]:
     """
     authorize_tool(
         "search_enterprise_documents",
+        CURRENT_USER.user_id,
         CURRENT_USER.scopes,
     )
 
@@ -40,6 +41,7 @@ def read_enterprise_document(document_id: str) -> dict[str, str]:
     """
     authorize_tool(
         "read_enterprise_document",
+        CURRENT_USER.user_id,
         CURRENT_USER.scopes,
     )
 

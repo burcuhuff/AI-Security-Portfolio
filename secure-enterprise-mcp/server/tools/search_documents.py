@@ -1,20 +1,19 @@
 #server/tools/search_documents.py
-from pathlib import Path
-
-
-DATA_DIR = Path(__file__).resolve().parents[2] / "data"
+from server.security.trust_boundary import TRUSTED_DOCUMENTS_DIR
 
 
 def search_documents(query: str) -> list[dict]:
     """
-    Search local enterprise documents for text matching the query.
-    Returns document metadata rather than document contents.
+    Search trusted enterprise documents for matching text.
+
+    Quarantined or otherwise untrusted documents are intentionally
+    excluded from search.
     """
 
     query = query.lower().strip()
     results = []
 
-    for file_path in DATA_DIR.glob("*.txt"):
+    for file_path in TRUSTED_DOCUMENTS_DIR.glob("*.txt"):
         content = file_path.read_text(encoding="utf-8")
 
         if query in content.lower():

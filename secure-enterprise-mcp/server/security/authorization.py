@@ -2,13 +2,17 @@
 from collections.abc import Iterable
 
 from mcp.server.mcpserver.exceptions import ToolError
-
+from server.audit.logger import log_tool_event
 from server.security.policy import get_tool_policy
 
-
-def authorize_tool(tool_name: str, user_scopes: Iterable[str]) -> None:
+def authorize_tool(
+    tool_name: str,
+    user_id: str,
+    user_scopes: Iterable[str],
+) -> None:
     """
     Authorize access to an MCP tool based on its required scopes.
+    Records both allowed and denied authorization decisions.
 
     Raises:
         ToolError: If the caller lacks one or more required scopes.
@@ -23,7 +27,26 @@ def authorize_tool(tool_name: str, user_scopes: Iterable[str]) -> None:
     missing_scopes = required_scopes - granted_scopes
 
     if missing_scopes:
+        log_tool_event(
+            user_id=user_id,
+            tool_name=tool_name,
+            outcome="denied",
+            details={
+                "missing_scopes": sorted(missing_scopes),
+            },
+        )
+
         raise ToolError(
             f"Access denied. Missing required scopes: "
             f"{sorted(missing_scopes)}"
         )
+
+    log_tool_event(
+        user_id=user_id,
+        tool_name=tool_name,
+        outcome="allowed",
+        details={
+            "required_scopes": sorted(required_scopes),
+        },
+    )
+
