@@ -1,6 +1,21 @@
-# Secure Enterprise MCP
+<p align="center">
+  <img src="./.assets/mcp-logo.png" alt="Secure Enterprise MCP Logo" width="120" height="120">
+</p>
 
-A small security focused MCP project that demonstrates how enterprise tools can be exposed through Model Context Protocol while enforcing identity, least privilege, authorization, and declarative governance controls.
+<h1 align="center">Secure Enterprise MCP</h1>
+
+<p align="center">
+  <strong>A zero-trust gateway for enforcing declarative governance and tool-access boundaries in enterprise AI agents.</strong>
+</p>
+
+<p align="center">
+  <a href="#features">Features</a> •
+  <a href="#architecture">Architecture</a> •
+  <a href="#getting-started">Getting Started</a>
+</p>
+
+---
+A security focused MCP project that demonstrates how enterprise tools can be exposed through Model Context Protocol while enforcing identity, least privilege, authorization, and declarative governance controls.
 
 [Part 1 - MCP Setup](DESIGN.md#part-1---mcp-application-setup)
 
