@@ -15,7 +15,7 @@
 <p align="center">
   <a href="./SECURITY.md">Security Model</a> •
   <a href="./DESIGN.md">Architecture & Design</a> •
-  <a href="#run-the-demo">Run the Demo</a>
+  <a href="./RUNDEMO.md">Run the Demo</a>
 </p>
 
 ---
