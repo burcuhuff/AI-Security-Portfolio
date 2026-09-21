@@ -1,4 +1,12 @@
+# SECTIONS:
+- [Part 1 — MCP implementation](#part-1---mcp-application-setup)
+- [Part 2 — Identity / Authorization implementation](#part-2---identity--authorization-implementation)
+- [Part 3 — Trust Boundary implementation](#part-3---trust-boundary-implementation)
+- [Part 4 — Audit Implementation](#part-4---audit-implementation)
+
+
 # PART 1 - MCP Application Setup
+
 
 Working MCP client/server for tool discovery with search and read documents
 
