@@ -1,5 +1,5 @@
 # Secure Agent Execution Platform as part of MIDS Capstone 
-https://www.ischool.berkeley.edu/projects/2025/agent-iq-build-and-test-ai-agents-scale
+[https://www.ischool.berkeley.edu/projects/2025/agent-iq-build-and-test-ai-agents-scale](https://www.ischool.berkeley.edu/programs/mids/capstone/2025c-fall/build-and-test-ai-agents-scale)
 
 > A security first backend architecture for safely executing untrusted, user submitted AI agent scripts in a shared multi-tenant environment.
 
