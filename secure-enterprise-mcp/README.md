@@ -1,8 +1,6 @@
 <p align="center">
-  <img src="./.assets/mcp-logo.png" alt="Secure Enterprise MCP Logo" width="120" height="120">
+  <img src="./.assets/secure-mcp.png" alt="Secure Enterprise MCP Logo" width="220" height="220">
 </p>
-
-<h1 align="center">Secure Enterprise MCP</h1>
 
 <p align="center">
   <strong>A zero-trust gateway for enforcing declarative governance and tool-access boundaries in enterprise AI agents.</strong>
