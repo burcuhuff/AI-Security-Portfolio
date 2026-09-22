@@ -6,13 +6,7 @@
 
 <p align="center">
   <strong>
-    AI Security & Privacy Engineering Portfolio
-  </strong>
-</p>
-
-<p align="center">
-  <strong>
-    Hands on work across AI security, privacy engineering, secure backend architecture, and enterprise AI systems
+    Secure Enterprise AI Systems, Privacy Engineering and Secure Backend Architecture
   </strong>
 </p>
 
