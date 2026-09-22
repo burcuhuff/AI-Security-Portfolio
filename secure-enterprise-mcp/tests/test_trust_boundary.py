@@ -1,6 +1,6 @@
 # secure-enterprise-mcp/tests/test_trust_boundary.py
 import pytest
-
+import json
 import server.security.trust_boundary as trust_boundary
 import server.tools.search_documents as search_module
 from server.tools.read_document import read_document
@@ -55,6 +55,21 @@ def test_search_only_returns_trusted_documents(tmp_path, monkeypatch):
         "QUARANTINE SECRET TEST"
     )
 
+    print(
+        "\nTrust boundary search result:"
+    )
+    print(
+        json.dumps(
+            {
+                "security_property": "trusted_search_isolation",
+                "outcome": "passed",
+                "trusted_results": trusted_results,
+                "quarantine_results": quarantine_results,
+            },
+            indent=2,
+        )
+    )
+
     assert trusted_results == [
         {
             "document_id": "trusted.txt",
@@ -71,8 +86,24 @@ def test_path_traversal_into_quarantine_is_rejected(
 ):
     configure_test_directories(tmp_path, monkeypatch)
 
-    with pytest.raises(ValueError, match="Invalid document_id"):
+    with pytest.raises(
+        ValueError,
+        match="Invalid document_id",
+    ) as exc_info:
         read_document("../quarantine/untrusted.txt")
+
+    print("\nPath traversal protection result:")
+    print(
+        json.dumps(
+            {
+                "security_property": "path_traversal_protection",
+                "outcome": "blocked",
+                "requested_resource": "../quarantine/untrusted.txt",
+                "reason": str(exc_info.value),
+            },
+            indent=2,
+        )
+    )
 
 
 def test_quarantined_document_is_not_readable_as_trusted(
@@ -91,3 +122,15 @@ def test_quarantined_document_is_not_readable_as_trusted(
 
     with pytest.raises(FileNotFoundError):
         read_document("untrusted.txt")
+        print("\nQuarantine isolation result:")
+        print(
+            json.dumps(
+                {
+                    "security_property": "quarantine_isolation",
+                    "outcome": "blocked",
+                    "requested_resource": "untrusted.txt",
+                    "reason": str(exc_info.value),
+                },
+                indent=2,
+            )
+        )

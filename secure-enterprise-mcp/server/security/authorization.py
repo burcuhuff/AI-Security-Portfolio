@@ -2,7 +2,7 @@
 from collections.abc import Iterable
 
 from mcp.server.mcpserver.exceptions import ToolError
-from server.audit.logger import log_tool_event
+from server.audit.logger import log_security_event
 from server.security.policy import get_tool_policy
 
 def authorize_tool(
@@ -27,10 +27,11 @@ def authorize_tool(
     missing_scopes = required_scopes - granted_scopes
 
     if missing_scopes:
-        log_tool_event(
+        log_security_event(
+            event_type="authorization_decision",
+            outcome="denied",
             user_id=user_id,
             tool_name=tool_name,
-            outcome="denied",
             details={
                 "missing_scopes": sorted(missing_scopes),
             },
@@ -41,12 +42,12 @@ def authorize_tool(
             f"{sorted(missing_scopes)}"
         )
 
-    log_tool_event(
+    log_security_event(
+        event_type="authorization_decision",
+        outcome="allowed",
         user_id=user_id,
         tool_name=tool_name,
-        outcome="allowed",
         details={
             "required_scopes": sorted(required_scopes),
         },
     )
-
