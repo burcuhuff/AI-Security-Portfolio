@@ -1,7 +1,28 @@
-# AI Security & Privacy Engineering Portfolio
+<p align="center">
+  <img src="./.assets/ai-security-portfolio.png"
+       alt="AI Security Portfolio"
+       width="220">
+</p>
 
-This repository showcases hands on work across AI security, privacy engineering,
-secure backend architecture, and enterprise AI systems.
+<p align="center">
+  <strong>
+    AI Security & Privacy Engineering Portfolio.
+  </strong>
+</p>
+
+<p align="center">
+  <strong>
+    Hands on work across AI security, privacy engineering, secure backend architecture, and enterprise AI systems.
+  </strong>
+</p>
+
+<p align="center">
+  <a href="./secure-enterprise-mcp/README.md">Secure Enterprise MCP</a> •
+  <a href="./privacy-hr-pipeline/README.md">Privacy Engineering Portfolio</a> •
+  <a href="./capstone/README.md">UC Berkeley MIDS Capstone</a>
+</p>
+
+# 
 
 The projects range from production oriented security architecture developed during
 my UC Berkeley MIDS capstone to independent implementations exploring secure MCP
@@ -11,11 +32,10 @@ authorization, and governance controls.
 Each project is documented separately with its architecture, security goals,
 implementation decisions, and technical design.
 
-# Repository Guide
 
-## 1. Secure Enterprise MCP (Model Context Protocol)
+## 1. Secure Enterprise MCP 
 
-A security focused MCP implementation that explores how enterprise capabilities
+A security focused MCP (Model Context Protocol) implementation that explores how enterprise capabilities
 can be exposed to AI agents while enforcing controls independently of model behavior.
 
 - **Current security controls:** trusted and quarantined data boundaries,
@@ -25,7 +45,7 @@ can be exposed to AI agents while enforcing controls independently of model beha
   authorization, policy, and trusted-data layers
 - **Tech stack:** Python, MCP SDK 2.x, YAML
 
-➡️ **[Explore Secure Enterprise MCP](./secure-enterprise-mcp)**
+➡️ **[Explore Secure Enterprise MCP](./secure-enterprise-mcp/README.md)**
 
 
 ## 2. Privacy Engineering Portfolio
