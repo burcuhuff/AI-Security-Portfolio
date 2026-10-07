@@ -35,7 +35,7 @@ and structured security audit events.
 
 - Scope based MCP tool authorization
 - Declarative YAML tool governance
-- Fail-closed policy enforcement
+- Fail-closed policy enforcement (ALLOW, REQUEST_APPROVAL, DENY)
 - Least-privilege principals
 - Trusted and quarantined data boundaries
 - Path traversal protection
@@ -43,9 +43,10 @@ and structured security audit events.
 - Explicit MCP subprocess environment propagation
 - Tool errors handled as expected security outcomes
 
-## Architecture
+## System Architecture 
 
 ```text
+ 
                 MCP Client
                     │
                     │ MCP over stdio
@@ -66,3 +67,42 @@ and structured security audit events.
            ▼                 ▼
       Trusted Data       Quarantine
       search / read      untrusted data
+```
+## Security Control Flow for Sensitive Outbound Action with ALLOW
+```
+        Agent requests: 
+        send_enterprise_document(
+            document_id="...",
+            destination="..."
+        )
+
+            │
+            ▼
+      Authentication
+            │
+            ▼
+      Authorization
+            │
+            ▼
+      Policy evaluation
+            │
+      ┌─────┴─────┐
+      │           │
+    DENY       ALLOWED
+                  │
+          approval required?
+                  │
+             YES  ▼
+            PENDING
+                  │
+             Human decision
+              /        \
+         APPROVE       DENY
+            │            │
+            ▼            ▼
+          SEND        BLOCK
+            │            │
+            └─────┬──────┘
+                  ▼
+             Audit event
+```

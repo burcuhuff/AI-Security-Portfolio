@@ -270,6 +270,12 @@ python -m client.agent
             |──► all scopes present ──► ALLOW    
 
 #### Test:
+
+    python -m pip install -r requirements.txt
+    python -m pip install pytest 
+    python -m pytest -q 
+
+
 ```
 >>> from server.security.authorization import authorize_tool
 >>> analyst_scopes = {
@@ -731,4 +737,112 @@ Denied authorization audit event:
 }
 5 passed in 1.36s
 (.venv) burcu@Burcus-MacBook-Pro secure-enterprise-mcp % 
+
+
+## 4.1 Send_Enterprise_Document
+
+Approval represents explicit authorization for one exact sensitive action. It is bound to the requesting principal, tool, resource, and destination. It expires. It cannot be issued through the agent accessible MCP interface. It is single-use. And all state transitions are auditable.
+
+                    ┌──────────┐
+                    │ PENDING  │
+                    └────┬─────┘
+                         │
+             ┌───────────┼───────────┐
+             │           │           │
+             ▼           ▼           ▼
+        ┌──────────┐ ┌────────┐ ┌─────────┐
+        │ APPROVED │ │ DENIED │ │ EXPIRED │
+        └────┬─────┘ └────────┘ └─────────┘
+             │
+             │ one permitted execution attempt
+             ▼
+        ┌──────────┐
+        │ CONSUMED │
+        └──────────┘
+
+>> ```CONSUMED``` is added to avoid authorizing the same export repeatedly.
 ```
+approval_id = xyz123
+status = ARROVED 
+without CONSUMED, the document can pass repeatedly.
+```
+
+```
+approval_id = xyz123
+status = ARROVED 
+APPROVED -> CONSUMED 
+this grants one action, avoids permanent permission.
+```
+
+>> Authorization alone is intentionally insufficient.
+```
+send request
+      │
+      ▼
+valid authorization?
+      │
+     yes
+      │
+      ▼
+valid approval?
+   /       \
+ no         yes
+ │           │
+BLOCK       continue
+```
+
+Approval is bound to
+
+    principle
+    tool
+    document
+    destination
+
+>> Added Approval Stotre with secure-enterprise-mcp/security/approval.py supporting:
+
+                    Agent / MCP
+
+                        │
+                        ▼
+
+                  MCP Tool Request
+                        │
+                        ▼
+               Authentication
+                        │
+                        ▼
+                Authorization
+                        │
+                        ▼
+                Policy Decision
+                        │
+                        ▼
+            ┌─────────────────────┐
+            │   Approval Store    │
+            │                     │
+            │ PENDING             │
+            │ APPROVED            │
+            │ DENIED              │
+            │ EXPIRED             │
+            │ CONSUMED            │
+            └─────────────────────┘
+                     ▲
+                     │
+              Human / Operator
+              control plane
+
+>> Test scope added in secure-enterprise-mcp/tests/test_approval.py:
+
+    PENDING → APPROVED
+    PENDING → DENIED
+    PENDING → EXPIRED
+
+    APPROVED → CONSUMED
+
+    wrong principal     → BLOCK
+    wrong tool          → BLOCK
+    wrong document      → BLOCK
+    wrong destination   → BLOCK
+
+    reuse consumed ID   → BLOCK
+

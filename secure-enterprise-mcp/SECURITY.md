@@ -233,3 +233,46 @@ Current limitations include:
 These limitations are documented intentionally so implemented protections are
 not confused with planned capabilities.
 
+## Security Control Flow for Sensitive Outbound Action with ALLOW
+```
+        Agent requests: 
+        send_enterprise_document(
+            document_id="...",
+            destination="..."
+        )
+
+            │
+            ▼
+      Authentication
+            │
+            ▼
+      Authorization
+            │
+            ▼
+      Policy evaluation
+            │
+      ┌─────┴─────┐
+      │           │
+    DENY       ALLOWED
+                  │
+          approval required?
+                  │
+             YES  ▼
+            PENDING
+                  │
+             Human decision
+              /        \
+         APPROVE       DENY
+            │            │
+            ▼            ▼
+          SEND        BLOCK
+            │            │
+            └─────┬──────┘
+                  ▼
+             Audit event
+```
+
+
+## Security Control Flow for Sensitive Outbound Action with REQUEST_APPROVAL
+
+## Security Control Flow for Sensitive Outbound Action with DENY
