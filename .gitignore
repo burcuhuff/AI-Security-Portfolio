@@ -21,6 +21,9 @@
 **/*.jsonl
 **/*.log
 
+# Keep MCP audit example
+!secure-enterprise-mcp/examples/sample_audit.jsonl
+
 # --- Security & Secrets ---
 **/.env
 **/*.pem

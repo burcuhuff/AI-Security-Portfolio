@@ -9,6 +9,7 @@ Security properties:
 - Approval is not exposed through the agent accessible MCP tool surface.
 - Approved actions are single use and protected against concurrent replay.
 """
+import server.audit.logger as audit_logger
 from dataclasses import dataclass, replace
 from datetime import datetime, timedelta, timezone
 from enum import Enum
@@ -48,6 +49,33 @@ class ApprovalRequest:
 
 def _utc_now() -> datetime:
     return datetime.now(timezone.utc)
+
+def _log_approval_event(
+    request: ApprovalRequest,
+    *,
+    event_type: str,
+    outcome: str,
+    details: dict | None = None,
+    user_id: str | None = None,
+    tool_name: str | None = None,
+    resource_id: str | None = None,
+) -> None:
+    event_details = {
+        "approval_id": request.approval_id,
+        "destination": request.destination,
+    }
+
+    if details:
+        event_details.update(details)
+
+    audit_logger.log_security_event(
+        event_type=event_type,
+        outcome=outcome,
+        user_id=user_id or request.principal_id,
+        tool_name=tool_name or request.tool_name,
+        resource_id=resource_id or request.document_id,
+        details=event_details,
+    )
 
 # the store is in memory (not for prod) 
 # TODO: replace in-memory with persistent storage and transactional semantics
@@ -91,6 +119,15 @@ class ApprovalStore:
         with self._lock:
             self._requests[request.approval_id] = request
 
+        _log_approval_event(
+            request,
+            event_type="approval_request",
+            outcome="pending",
+            details={
+                "expires_at": request.expires_at.isoformat(),
+            },
+        )
+
         return request
 
     # retrival helper
@@ -121,6 +158,12 @@ class ApprovalStore:
 
             self._requests[request.approval_id] = request
 
+            _log_approval_event(
+                request,
+                event_type="approval_expiration",
+                outcome="expired",
+            )
+
         return request
     
     # approval
@@ -149,6 +192,15 @@ class ApprovalStore:
             )
 
             self._requests[approval_id] = request
+
+            _log_approval_event(
+                request,
+                event_type="approval_decision",
+                outcome="approved",
+                details={
+                    "decided_by": decided_by,
+                },
+            )  
 
             return request
 
@@ -179,6 +231,15 @@ class ApprovalStore:
 
             self._requests[approval_id] = request
 
+            _log_approval_event(
+                request,
+                event_type="approval_decision",
+                outcome="denied",
+                details={
+                    "decided_by": decided_by,
+                },
+            )
+
             return request
 
     # core function
@@ -197,27 +258,90 @@ class ApprovalStore:
             )
 
             if request.status != ApprovalStatus.APPROVED:
+                _log_approval_event(
+                    request,
+                    event_type="approval_consumption",
+                    outcome="blocked",
+                    user_id=principal_id,
+                    tool_name=tool_name,
+                    resource_id=document_id,
+                    details={
+                        "reason": "invalid_status",
+                        "status": request.status.value,
+                    },
+                )
+
                 raise ApprovalError(
                     f"Approval is not usable in state "
                     f"{request.status.value}."
                 )
 
             if request.principal_id != principal_id:
+                _log_approval_event(
+                    request,
+                    event_type="approval_consumption",
+                    outcome="blocked",
+                    user_id=principal_id,
+                    details={
+                        "reason": "principal_mismatch",
+                        "approved_principal_id": request.principal_id,
+                    },
+                )
+
                 raise ApprovalError(
                     "Approval principal does not match request."
                 )
 
             if request.tool_name != tool_name:
+                _log_approval_event(
+                    request,
+                    event_type="approval_consumption",
+                    outcome="blocked",
+                    user_id=principal_id,
+                    tool_name=tool_name,
+                    details={
+                        "reason": "tool_mismatch",
+                        "approved_tool_name": request.tool_name,
+                    },
+                )
+
                 raise ApprovalError(
                     "Approval tool does not match request."
                 )
 
             if request.document_id != document_id:
+                _log_approval_event(
+                    request,
+                    event_type="approval_consumption",
+                    outcome="blocked",
+                    user_id=principal_id,
+                    tool_name=tool_name,
+                    resource_id=document_id,
+                    details={
+                        "reason": "document_mismatch",
+                        "approved_document_id": request.document_id,
+                    },
+                )
+
                 raise ApprovalError(
                     "Approval document does not match request."
                 )
 
             if request.destination != destination:
+                _log_approval_event(
+                    request,
+                    event_type="approval_consumption",
+                    outcome="blocked",
+                    user_id=principal_id,
+                    tool_name=tool_name,
+                    resource_id=document_id,
+                    details={
+                        "reason": "destination_mismatch",
+                        "approved_destination": request.destination,
+                        "attempted_destination": destination,
+                    },
+                )
+
                 raise ApprovalError(
                     "Approval destination does not match request."
                 )
@@ -228,6 +352,12 @@ class ApprovalStore:
             )
 
             self._requests[approval_id] = request
+
+            _log_approval_event(
+                request,
+                event_type="approval_consumption",
+                outcome="consumed",
+            )
 
             return request
         

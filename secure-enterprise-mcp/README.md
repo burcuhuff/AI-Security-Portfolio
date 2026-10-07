@@ -106,3 +106,40 @@ and structured security audit events.
                   ▼
              Audit event
 ```
+## **Human Approval Control Plane** 
+
+      - Approval model → ApprovalRequest + ApprovalStatus
+      - Approval store / state machine → ApprovalStore
+
+Approval represents explicit authorization for one exact sensitive action. It is bound to the requesting principal, tool, resource, and destination. It expires. It cannot be issued through the agent accessible MCP interface. It is single-use. And all state transitions are auditable.
+
+        Approval Store Implementation
+
+    Human Approval subsystem
+    ├── ApprovalRequest model
+    ├── ApprovalStatus state machine
+    └── ApprovalStore
+        ├── create → PENDING
+        ├── approve → APPROVED
+        ├── deny → DENIED
+        ├── expire → read current state / expire if needed
+        └── consume → validate exact request + APPROVED → CONSUMED
+
+### Approval Audit Trail
+
+Approval lifecycle events are emitted as structured JSONL security records.
+
+The audit trail captures approval requests, human decisions, expiration,
+successful consumption, and blocked attempts without recording sensitive
+document contents or credentials.
+
+For example, an approved action can still be blocked if an agent attempts
+to substitute a different destination:
+
+```
+approval_request      pending
+approval_decision     approved
+approval_consumption  blocked   reason=destination_mismatch
+approval_consumption  consumed
+```
+A sanitized example audit trail is available at examples/sample_audit.jsonl

@@ -1,10 +1,19 @@
 #secure-enterprise-mcp/tests/test_approval.py
-
+import json
+import server.audit.logger as audit_logger
+import pytest
 from datetime import datetime, timedelta, timezone
 from threading import Barrier
 from concurrent.futures import ThreadPoolExecutor
 
-import pytest
+
+def read_events(audit_file):
+    return [
+        json.loads(line)
+        for line in audit_file.read_text(
+            encoding="utf-8"
+        ).splitlines()
+    ]
 
 from server.security.approval import (
     ApprovalError,
@@ -32,7 +41,20 @@ def clock():
 
 
 @pytest.fixture
-def store(clock):
+def audit_file(tmp_path, monkeypatch):
+    audit_file = tmp_path / "audit.jsonl"
+
+    monkeypatch.setattr(
+        audit_logger,
+        "AUDIT_FILE",
+        audit_file,
+    )
+
+    return audit_file
+
+
+@pytest.fixture
+def store(clock, audit_file):
     return ApprovalStore(clock=clock)
 
 
@@ -333,3 +355,133 @@ def test_non_positive_ttl_is_rejected(store):
             destination="partner@example.com",
             ttl=timedelta(0),
         )
+
+# test creation audit
+def test_create_writes_approval_audit_event(
+    store,
+    pending_request,
+    audit_file,
+):
+    events = read_events(audit_file)
+
+    event = events[-1]
+
+    assert event["event_type"] == "approval_request"
+    assert event["outcome"] == "pending"
+    assert event["user_id"] == "analyst"
+    assert event["tool_name"] == "send_enterprise_document"
+    assert event["resource_id"] == "finance_report.txt"
+
+    assert (
+        event["details"]["approval_id"]
+        == pending_request.approval_id
+    )
+
+# test approval audit
+def test_approval_decision_is_audited(
+    store,
+    pending_request,
+    audit_file,
+):
+    store.approve(
+        pending_request.approval_id,
+        decided_by="security_operator",
+    )
+
+    event = read_events(audit_file)[-1]
+
+    assert event["event_type"] == "approval_decision"
+    assert event["outcome"] == "approved"
+    assert event["details"]["decided_by"] == "security_operator"
+
+# test destination attack
+def test_destination_mismatch_is_audited(
+    store,
+    pending_request,
+    audit_file,
+):
+    store.approve(
+        pending_request.approval_id,
+        decided_by="security_operator",
+    )
+
+    with pytest.raises(ApprovalError):
+        store.consume(
+            approval_id=pending_request.approval_id,
+            principal_id="analyst",
+            tool_name="send_enterprise_document",
+            document_id="finance_report.txt",
+            destination="attacker@example.com",
+        )
+
+    event = read_events(audit_file)[-1]
+
+    assert event["event_type"] == "approval_consumption"
+    assert event["outcome"] == "blocked"
+
+    assert event["details"]["reason"] == "destination_mismatch"
+
+    assert (
+        event["details"]["approved_destination"]
+        == "partner@example.com"
+    )
+
+    assert (
+        event["details"]["attempted_destination"]
+        == "attacker@example.com"
+    )
+
+# test successful consumption audit
+def test_successful_consumption_is_audited(
+    store,
+    pending_request,
+    audit_file,
+):
+    store.approve(
+        pending_request.approval_id,
+        decided_by="security_operator",
+    )
+
+    store.consume(
+        approval_id=pending_request.approval_id,
+        principal_id="analyst",
+        tool_name="send_enterprise_document",
+        document_id="finance_report.txt",
+        destination="partner@example.com",
+    )
+
+    event = read_events(audit_file)[-1]
+
+    assert event["event_type"] == "approval_consumption"
+    assert event["outcome"] == "consumed"
+
+# test replay attempt audit
+def test_replay_attempt_is_audited(
+    store,
+    pending_request,
+    audit_file,
+):
+    store.approve(
+        pending_request.approval_id,
+        decided_by="security_operator",
+    )
+
+    kwargs = dict(
+        approval_id=pending_request.approval_id,
+        principal_id="analyst",
+        tool_name="send_enterprise_document",
+        document_id="finance_report.txt",
+        destination="partner@example.com",
+    )
+
+    store.consume(**kwargs)
+
+    with pytest.raises(ApprovalError):
+        store.consume(**kwargs)
+
+    event = read_events(audit_file)[-1]
+
+    assert event["event_type"] == "approval_consumption"
+    assert event["outcome"] == "blocked"
+    assert event["details"]["reason"] == "invalid_status"
+    assert event["details"]["status"] == "CONSUMED"

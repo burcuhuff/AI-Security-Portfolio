@@ -19,18 +19,18 @@ def log_security_event(
     details: dict[str, Any] | None = None,
 ) -> None:
     """
-    Write a structured MCP tool audit event.
+    Write a structured security audit event.
 
     Security events intentionally contain metadata rather than
     sensitive document contents or credentials.
 
     Args:
+        event_type: Security relevant event category.
+        outcome: Result such as "allowed", "denied", or "blocked".
         user_id: Authenticated or simulated principal identifier.
-        tool_name: MCP tool being invoked.
-        outcome: Result such as "allowed" or "denied".
-        details: Optional non-sensitive contextual metadata.
-        event_type: What security relevant event occured
-        resource_id: Which objct/data item was affected
+        tool_name: MCP tool associated with the event, when applicable.
+        resource_id: Object or data item affected by the event.
+        details: Optional non sensitive contextual metadata.
     """
 
     AUDIT_DIR.mkdir(parents=True, exist_ok=True)
