@@ -16,11 +16,11 @@ tools:
     audit_required: true
 
   ingest_external_document:
-  risk: high
-  required_scopes:
-    - documents.ingest
-  approval_required: true
-  audit_required: true
+    risk: high
+    required_scopes:
+      - documents.ingest
+    approval_required: true
+    audit_required: true
 
   send_document_external:
     risk: high
