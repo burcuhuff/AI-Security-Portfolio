@@ -1,0 +1,13 @@
+# secure-enterprise-mcp/.dockerignore
+# keep following out of the build
+.git
+.venv
+venv
+**/__pycache__
+**/*.pyc
+.pytest_cache
+.env
+.env.*
+logs
+.assets
+.vscode
