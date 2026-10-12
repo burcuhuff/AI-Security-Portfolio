@@ -167,6 +167,71 @@ Approval represents explicit authorization for one exact sensitive action. It is
         ├── expire → read current state / expire if needed
         └── consume → validate exact request + APPROVED → CONSUMED
 
+
+### Approval Model
+
+The approval subsystem maintains immutable request records in an
+in-memory store. Requests bind approval to a specific principal,
+tool, document, and destination.
+
+```mermaid
+classDiagram
+    direction TB
+
+    class ApprovalStore {
+        -dict requests
+        -Callable clock
+        -RLock lock
+        +create(principal_id, tool_name, document_id, destination, ttl) ApprovalRequest
+        +approve(approval_id, decided_by) ApprovalRequest
+        +deny(approval_id, decided_by) ApprovalRequest
+        +consume(approval_id, principal_id, tool_name, document_id, destination) ApprovalRequest
+        +get(approval_id) ApprovalRequest
+    }
+
+    class ApprovalRequest {
+        <<immutable dataclass>>
+        +str approval_id
+        +str principal_id
+        +str tool_name
+        +str document_id
+        +str destination
+        +ApprovalStatus status
+        +datetime created_at
+        +datetime expires_at
+        +str decided_by
+        +datetime decided_at
+    }
+
+    class ApprovalStatus {
+        <<enumeration>>
+        PENDING
+        APPROVED
+        DENIED
+        EXPIRED
+        CONSUMED
+    }
+
+    class ApprovalError {
+        <<exception>>
+    }
+
+    ApprovalStore "1" --> "0..*" ApprovalRequest : stores
+    ApprovalRequest --> ApprovalStatus : has status
+    ApprovalStore ..> ApprovalError : raises
+```
+
+`decided_by` and `decided_at` are optional until a decision is recorded.
+State transitions replace immutable records rather than modifying them.
+
+- The store validates expiry and exact-action matching before consumption.
+Its lock prevents concurrent reuse within the same store instance;
+it does not provide coordination across processes or containers.
+
+- The current store is an internal primitive, not an authenticated human
+approval interface. It is not yet connected to an outbound MCP tool.
+
+
 ### Approval Audit Trail
 
 Approval lifecycle events are emitted as structured JSONL security records.

@@ -155,3 +155,18 @@ type='text' text="Error executing tool read_enterprise_document: Access denied. 
 (venv) burcu@Burcus-MacBook-Pro secure-enterprise-mcp % 
 
 ```
+
+```
+(venv) burcu@Burcus-MacBook-Pro secure-enterprise-mcp % docker cp mcp-analyst:/app/logs/mcp_audit.jsonl /tmp/mcp-analyst-audit.jsonl
+Successfully copied 501B (transferred 2.05kB) to /tmp/mcp-analyst-audit.jsonl
+(venv) burcu@Burcus-MacBook-Pro secure-enterprise-mcp % docker cp mcp-restricted:/app/logs/mcp_audit.jsonl /tmp/mcp-restricted-audit.jsonl
+Successfully copied 515B (transferred 2.56kB) to /tmp/mcp-restricted-audit.jsonl
+(venv) burcu@Burcus-MacBook-Pro secure-enterprise-mcp % cat /tmp/mcp-analyst-audit.jsonl
+{"timestamp": "2026-10-11T15:32:12.220068+00:00", "user_id": "analyst", "tool_name": "search_enterprise_documents", "outcome": "allowed", "details": {"required_scopes": ["documents.search"]}, "event_type": "authorization_decision", "resource_id": null}
+{"timestamp": "2026-10-11T15:32:12.327600+00:00", "user_id": "analyst", "tool_name": "read_enterprise_document", "outcome": "allowed", "details": {"required_scopes": ["documents.read"]}, "event_type": "authorization_decision", "resource_id": null}
+(venv) burcu@Burcus-MacBook-Pro secure-enterprise-mcp % cat /tmp/mcp-restricted-audit.jsonl
+{"timestamp": "2026-10-11T15:44:49.947691+00:00", "user_id": "restricted_user", "tool_name": "search_enterprise_documents", "outcome": "allowed", "details": {"required_scopes": ["documents.search"]}, "event_type": "authorization_decision", "resource_id": null}
+{"timestamp": "2026-10-11T15:44:50.048398+00:00", "user_id": "restricted_user", "tool_name": "read_enterprise_document", "outcome": "denied", "details": {"missing_scopes": ["documents.read"]}, "event_type": "authorization_decision", "resource_id": null}
+(venv) burcu@Burcus-MacBook-Pro secure-enterprise-mcp % 
+
+```
