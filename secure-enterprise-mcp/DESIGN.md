@@ -1010,3 +1010,63 @@ approval interface. It is not yet connected to an outbound MCP tool.
         ├── replay protection
         ├── concurrency protection
         └── structured approval audit events
+
+
+### Current System Component Architecture
+
+The client and server run as separate processes inside one Docker
+container. Components below represent Python modules, not separate
+microservices.
+
+```mermaid
+flowchart TD
+    subgraph containerBoundary["Docker container · non-root app user"]
+        clientAgent["Demo client · client/agent.py"]
+
+        subgraph serverProcess["MCP server process"]
+            mcpServer["Tool interface · mcp_server.py"]
+            identity["Demo identity · auth.py"]
+            authorization["Scope authorization · authorization.py"]
+            policyLoader["Policy loader · policy.py"]
+            documentTools["Document tools · search / read"]
+            trustBoundary["Trusted paths · trust_boundary.py"]
+            auditLogger["Audit writer · logger.py"]
+
+            mcpServer -->|"Resolves principal"| identity
+            mcpServer -->|"Checks permissions"| authorization
+            mcpServer -->|"Invokes authorized tools"| documentTools
+            authorization -->|"Loads required scopes"| policyLoader
+            authorization -->|"Records decisions"| auditLogger
+            documentTools -->|"Uses trusted directory / resolver"| trustBoundary
+        end
+
+        subgraph localFiles["Container filesystem"]
+            policyFile["tool-policy.yaml"]
+            trustedDocuments["data/trusted/*.txt"]
+            auditFile["logs/mcp_audit.jsonl"]
+        end
+
+        subgraph approvalModule["Packaged approval module · not wired into MCP tools"]
+            approvalStore["ApprovalStore · approval.py"]
+        end
+
+        clientAgent -->|"Launches server · MCP over stdio"| mcpServer
+        policyLoader -->|"Reads"| policyFile
+        documentTools -->|"Searches / reads"| trustedDocuments
+        auditLogger -->|"Appends JSONL"| auditFile
+        approvalStore -.->|"Uses when invoked"| auditLogger
+    end
+```
+
+**Implementation boundaries**
+
+- `DEMO_USER` selects a simulated principal at server startup; this is
+  not production authentication.
+- The MCP tool interface calls authorization before invoking document
+  tools. The document helper functions do not independently check scopes.
+- Search uses the trusted directory; read additionally validates the
+  requested document path through the trusted-path resolver.
+- The approval module is implemented and unit-tested, but the current
+  MCP server does not instantiate it or expose an outbound tool.
+- Audit events currently go to a local JSONL file. Stderr output and
+  centralized cloud collection are not yet implemented.
