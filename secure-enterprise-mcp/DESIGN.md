@@ -3,7 +3,7 @@
 - [Part 2 — Identity And Authorization](#part-2---identity-and-authorization)
 - [Part 3 — Trust Boundary Implementation](#part-3---trust-boundary-implementation)
 - [Part 4 — Audit and Security Observability](#part-4---audit-and-security-observability)
-
+- [Part 5 — CI Build](#part-5---ci-build)
 
 # PART 1 - MCP Implementation
 
@@ -1070,3 +1070,18 @@ flowchart TD
   MCP server does not instantiate it or expose an outbound tool.
 - Audit events currently go to a local JSONL file. Stderr output and
   centralized cloud collection are not yet implemented.
+
+# PART 5 - CI Build
+
+The CI workflow validates the application and its Docker image
+in a fresh GitHub-hosted environment.
+
+- Workflow: `.github/workflows/mcp-ci.yml`, at the portfolio repository root.
+- Triggers: relevant pushes to `main`, pull requests, or manual execution.
+- Checks: Python tests, Docker image build, and container authorization smoke checks.
+- Smoke checks verify that the analyst can search and read, while the
+  restricted user can search but is denied read access. They inspect
+  audit events and client results rather than relying only on exit codes.
+- Shell commands run inside `secure-enterprise-mcp` through `working-directory`.
+- The workflow's GitHub token has read-only repository contents access.
+- This workflow does not publish the image or deploy the application.

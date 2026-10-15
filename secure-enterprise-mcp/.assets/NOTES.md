@@ -182,3 +182,31 @@ Successfully copied 515B (transferred 2.56kB) to /tmp/mcp-restricted-audit.jsonl
 - For now I'll keep AWS usage bounded and avoid a standing EKS cluster. 
 
 - For now, I'll keep stdio wokload - the HTTP transport, a database, and outbound approval integration remain later product steps. 
+
+## An HR document service where users can access permitted information and request controlled exports, with traceable decisions.
+
+| Information | Proposed home | Purpose |
+|---|---|---|
+| HR documents/datasets | Private object storage, such as S3 | Durable content storage |
+| Document permissions, ownership, approval requests | Application database | Shared, durable business state |
+| Security audit events | Centralized, access-controlled logging destination | Evidence across users, instances, and restarts |
+| Temporary execution files | Isolated execution environment | Disposable working data |
+
+- For the first AWS deployment, we can collect container output centrally. For sensitive exports later, we should design durable recording of the approval and execution intent, including what happens when logging or delivery fails.
+- The product needs richer events, not document contents in logs
+Our current event says a scope check was allowed or denied. “Authorization allowed” does not prove the document was successfully read or sent.
+The product should distinguish:
+    - Decision: Who requested which action, against which document, and why it was allowed or denied?
+    - Execution: Did that action succeed, fail, or remain pending?
+    - Correlation: Which request, approval, and document version connect those events?
+- Useful fields would include an event ID, request ID, authenticated user ID, organization ID if applicable, document ID/version, action, outcome, and approval ID. Your current resource_id: null shows one gap we would address.
+- We should also remove the demo client’s document-content printing before introducing HR data. Logs need restricted access, defined retention, and protection against modification; credentials, tokens, and unnecessary personal information should stay out of them.
+
+## PLAN as of 1015/26:
+1. CI: automate tests, image build, and authorization checks.
+2. AWS + Terraform: publish the image and run an on-demand task with centralized logs.
+3. Local Kubernetes: run the same demo as a Job, inspect its Pod and logs, set resource requests/limits, and troubleshoot an intentional failure.
+4. Product expansion: Auth0, document-level permissions, durable approvals, and controlled exports.
+
+- Kubernetes is an interview learning milestone here, not yet a product requirement. A Job fits our current demo because it runs and exits. A Deployment becomes relevant later for a continuously running HTTP MCP service.
+- We’ll also cover how local Kubernetes concepts map to EKS, while being precise that this exercise gives you local Kubernetes hands-on experience—not production EKS ownership.
