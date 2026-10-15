@@ -37,6 +37,8 @@ can be exposed to AI agents while enforcing controls independently of model beha
   path traversal protection, and security audit events
 - **Architecture:** MCP client/server over stdio with separate identity,
   authorization, policy, and trusted-data layers
+- **CI Build:** Containerized MCP demo with structured audit logging and GitHub Actions
+  checks for Python tests, Docker builds, and allowed/denied access.
 - **Tech stack:** Python, MCP SDK 2.x, YAML
 
 ➡️ **[Explore Secure Enterprise MCP](./secure-enterprise-mcp/README.md)**

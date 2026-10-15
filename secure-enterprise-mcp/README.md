@@ -250,3 +250,21 @@ approval_consumption  blocked   reason=destination_mismatch
 approval_consumption  consumed
 ```
 A sanitized example audit trail is available at examples/sample_audit.jsonl
+
+## Continuous Integration
+
+GitHub Actions validates changes to this project by running:
+
+- Python tests.
+- A Docker image build.
+- Container smoke checks confirming that the analyst can search and
+  read documents, while the restricted user can search but is denied
+  read access.
+
+The smoke checks inspect audit events and client results rather than
+relying only on container exit codes.
+
+The workflow runs on relevant pushes to `main`, pull requests, and
+manual invocation. Image publishing and deployment are not yet included.
+
+See [CI design details](DESIGN.md#part-5---ci-build).
