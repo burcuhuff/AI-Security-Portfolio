@@ -170,3 +170,15 @@ Successfully copied 515B (transferred 2.56kB) to /tmp/mcp-restricted-audit.jsonl
 (venv) burcu@Burcus-MacBook-Pro secure-enterprise-mcp % 
 
 ```
+
+
+| Step | Build next  | Focuses on |
+|---|---|---|
+| **1. Container observability** | Emit audit events to stderr while retaining the JSONL file | Application logs, audit evidence, and troubleshooting |
+| **2. CI workflow** | Automate tests, image build, and allowed/denied smoke checks | How a change becomes a validated artifact |
+| **3. Small AWS deployment with Terraform** | Publish to ECR and run the demo as an on-demand ECS/Fargate task | IAM, networking, image registry versus compute, IaC, and cleanup |
+| **4. Local Kubernetes exercise** | Run the same image as a Job; inspect status, logs, and an intentional failure | Pods, Jobs, resource limits, and debugging |
+
+- For now I'll keep AWS usage bounded and avoid a standing EKS cluster. 
+
+- For now, I'll keep stdio wokload - the HTTP transport, a database, and outbound approval integration remain later product steps. 

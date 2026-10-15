@@ -1,4 +1,5 @@
 #server/audit/logger.py
+import sys
 import json
 from datetime import datetime, timezone
 from pathlib import Path
@@ -19,7 +20,9 @@ def log_security_event(
     details: dict[str, Any] | None = None,
 ) -> None:
     """
-    Write a structured security audit event.
+    Write a structured security audit event to a JSONL file and stderr.
+
+    If the file write fails, exception occurs first
 
     Security events intentionally contain metadata rather than
     sensitive document contents or credentials.
@@ -45,5 +48,11 @@ def log_security_event(
         "resource_id": resource_id,
     }
 
+    serialized_event = json.dumps(event)
+
     with AUDIT_FILE.open("a", encoding="utf-8") as file:
-        file.write(json.dumps(event) + "\n")
+        file.write(serialized_event + "\n")
+
+    # stderr copy makes successful audit writes visible to container log collection
+    # flush=True sends the event immediately
+    print(serialized_event, file=sys.stderr, flush=True)
