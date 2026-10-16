@@ -1,0 +1,8 @@
+#secure-enterprise-mcp/infra/terraform/.gitignore
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+terraform.tfvars
+*.auto.tfvars
+crash.log

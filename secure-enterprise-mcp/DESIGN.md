@@ -4,6 +4,8 @@
 - [Part 3 — Trust Boundary Implementation](#part-3---trust-boundary-implementation)
 - [Part 4 — Audit and Security Observability](#part-4---audit-and-security-observability)
 - [Part 5 — CI Build](#part-5---ci-build)
+- [Part 6 — AWS and Terraform](#part-6---aws-and-terraform)
+
 
 # PART 1 - MCP Implementation
 
@@ -1085,3 +1087,57 @@ in a fresh GitHub-hosted environment.
 - Shell commands run inside `secure-enterprise-mcp` through `working-directory`.
 - The workflow's GitHub token has read-only repository contents access.
 - This workflow does not publish the image or deploy the application.
+
+# PART 6 - AWS and Terraform
+
+- Establish a non-root AWS development identity.
+- Use Terraform to define the image registry, task infrastructure, permissions, and logging.
+- Publish the image and run both demo identities.
+- Inspect results and clean up the resources we no longer need.
+
+## AWS deployment preparation
+
+A dedicated AWS member account separates MCP infrastructure from existing
+portfolio workloads. Human access uses IAM Identity Center with MFA and
+temporary AWS CLI credentials.
+
+Initial provisioning uses an administrator permission set assigned only
+to the sandbox account. Workload IAM roles will be defined separately
+with least-privilege permissions.
+
+AWS CLI authentication has been verified and Terraform installed.
+Cloud deployment is not yet implemented. The next increment will define
+an ECR image repository, followed by on-demand ECS/Fargate execution
+and centralized CloudWatch logging.
+
+## AWS infrastructure — container registry
+
+### Implemented
+- Dedicated MCP sandbox account with IAM Identity Center, MFA,
+  and temporary CLI credentials.
+- Terraform configuration in `infra/terraform`.
+- Private ECR repository in us-east-1 with immutable image tags,
+  AES256 encryption, and project/environment tags.
+- AWS account validation through the provider's `allowed_account_ids`.
+- Container image published as `demo-v1` and verified in ECR.
+
+### State and access
+- Terraform state is currently local and excluded from Git.
+- The provider lock file is committed for reproducible provider selection.
+- Human provisioning uses sandbox administrator access.
+- Workload permissions will be defined separately.
+
+### Cost monitoring
+- Created a $20 monthly organization-wide budget with actual-spend
+  email thresholds at $5, $10, and $20.
+- A sandbox-specific budget remains pending because the new account
+  was not available in the billing filter.
+- Budget alerts do not enforce a spending cap.
+
+### Next
+- Provision networking, an ECS/Fargate task definition, an execution
+  IAM role, and a CloudWatch log group.
+- Run both demo identities and verify authorization decisions in
+  centralized logs.
+
+The image is stored in AWS; application execution in AWS is not yet implemented.

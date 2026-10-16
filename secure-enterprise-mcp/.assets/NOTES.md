@@ -202,11 +202,74 @@ The product should distinguish:
 - Useful fields would include an event ID, request ID, authenticated user ID, organization ID if applicable, document ID/version, action, outcome, and approval ID. Your current resource_id: null shows one gap we would address.
 - We should also remove the demo client’s document-content printing before introducing HR data. Logs need restricted access, defined retention, and protection against modification; credentials, tokens, and unnecessary personal information should stay out of them.
 
-## PLAN as of 1015/26:
-1. CI: automate tests, image build, and authorization checks.
+## PLAN as of 10/15/26:
+1. CI: automate tests, image build, and authorization checks. ✅
 2. AWS + Terraform: publish the image and run an on-demand task with centralized logs.
 3. Local Kubernetes: run the same demo as a Job, inspect its Pod and logs, set resource requests/limits, and troubleshoot an intentional failure.
 4. Product expansion: Auth0, document-level permissions, durable approvals, and controlled exports.
 
 - Kubernetes is an interview learning milestone here, not yet a product requirement. A Job fits our current demo because it runs and exits. A Deployment becomes relevant later for a continuously running HTTP MCP service.
 - We’ll also cover how local Kubernetes concepts map to EKS, while being precise that this exercise gives you local Kubernetes hands-on experience—not production EKS ownership.
+
+| Increment | What it accomplishes | Status |
+|---|---|---|
+| Account, SSO, MFA, CLI, Terraform | Establishes access and tooling | ✅ complete|
+| ECR through Terraform | Creates a place to store container images | ✅ complete|
+| Image publication | Uploads the tested image | ✅ complete - demo-v1 verified in ECR |
+| Task infrastructure and logging | Defines networking, IAM roles, execution, and logs | current task |
+| Run and verify | Confirms allowed/denied behavior in AWS and inspects logs | pending |
+
+## AWS infrastructure preparation - 10/16/26
+
+### Account separation
+- Enabled AWS Organizations and an organization instance of IAM Identity Center.
+- Existing AWS account is the management account and retains the capstone resources.
+- Created a dedicated member account named `mcp-sandbox` for MCP infrastructure.
+- Member-account charges roll up to the management account.
+- Selected us-east-1 for the MCP deployment.
+
+### Human access
+- Created Identity Center user `burcu.huff`.
+- Registered an MFA authenticator.
+- Configured MFA for every portal sign-in and required device registration.
+- Created the AdministratorAccess permission set with a 1hr account session.
+- Assigned it to this user only in the MCP sandbox account.
+- This is broad human provisioning access; application runtime permissions
+  will be defined separately with least privilege.
+
+### Local tooling and authentication
+- Configured AWS CLI SSO profile `mcp-sandbox`.
+- Verified the account and assumed SSO role using:
+  aws sts get-caller-identity --profile mcp-sandbox
+- This profile uses temporary credentials without new long-lived access keys.
+- Installed Terraform v1.16.6 for darwin_amd64 using HashiCorp's Homebrew tap.
+- Renew SSO login when needed:
+  aws sso login --profile mcp-sandbox
+
+### Current boundary
+- No MCP infrastructure has been provisioned through Terraform yet.
+- No MCP image has been published to ECR.
+- No MCP workload has run in AWS.
+- Budget alerts remain to be configured.
+
+### Next increment
+- Define an ECR repository in Terraform.
+- Review the plan before applying it.
+- Publish the verified container image.
+- Subsequently provision and run an on-demand ECS/Fargate task,
+  with scoped IAM roles and centralized CloudWatch logs.
+
+ ## October 16, 2026 — ECR milestone
+
+- Installed Terraform v1.16.6; initialized AWS provider v6.69.1.
+- Reviewed a plan containing one addition, no changes, and no deletions.
+- Applied the plan successfully to create the private ECR repository.
+- Authenticated Docker to ECR using the AWS CLI SSO profile.
+- Tagged the existing tested image as demo-v1, pushed it, and verified
+  its digest in ECR.
+- Confirmed Terraform downloads, local variables, state, and saved plans
+  are ignored by Git.
+- Created portfolio-total-monthly: $20, with $5/$10/$20 email alerts.
+- Still to verify: budget notification recipient email verification.
+- Deferred: sandbox-only budget filter and existing capstone cost review.
+- Next implementation: on-demand ECS/Fargate execution with CloudWatch logs. 
