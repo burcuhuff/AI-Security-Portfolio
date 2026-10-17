@@ -268,3 +268,20 @@ The workflow runs on relevant pushes to `main`, pull requests, and
 manual invocation. Image publishing and deployment are not yet included.
 
 See [CI design details](DESIGN.md#part-5---ci-build).
+
+### AWS execution
+
+The containerized MCP demo runs as an on demand ECS Fargate task.
+Terraform provisions its ECR repository, networking, execution IAM
+role, CloudWatch log group, ECS cluster, and task definition.
+
+The task runs as a non-root user with a digest pinned image.
+Container logs are delivered to CloudWatch with 7 day retention.
+
+Verified in AWS:
+- Analyst: document search and read allowed.
+- Restricted user: search allowed; read denied.
+- Both tasks completed and stopped with exit code 0.
+
+This remains a stdio demo with simulated identities, it is not a
+network accessible MCP service.

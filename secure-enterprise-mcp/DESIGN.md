@@ -1134,10 +1134,11 @@ and centralized CloudWatch logging.
   was not available in the billing filter.
 - Budget alerts do not enforce a spending cap.
 
-### Next
-- Provision networking, an ECS/Fargate task definition, an execution
-  IAM role, and a CloudWatch log group.
-- Run both demo identities and verify authorization decisions in
-  centralized logs.
-
-The image is stored in AWS; application execution in AWS is not yet implemented.
+## Design decisions:
+- One public subnet, task public IP, no inbound security-group rules, outbound HTTPS.
+- Execution role scoped to image pulls and log delivery; no application task role.
+- 0.25 vCPU, 512 MiB, Linux/X86_64, non-root execution.
+- Explicit blocking log delivery: backpressure may stall the application.
+- On demand tasks with no continuously running ECS service.
+- CloudWatch captures stdout/stderr, the container local audit file is short lived, 7 days.
+- Demo output includes synthetic document content, sensitive data use will require removing that content from logs.

@@ -246,19 +246,6 @@ The product should distinguish:
 - Renew SSO login when needed:
   aws sso login --profile mcp-sandbox
 
-### Current boundary
-- No MCP infrastructure has been provisioned through Terraform yet.
-- No MCP image has been published to ECR.
-- No MCP workload has run in AWS.
-- Budget alerts remain to be configured.
-
-### Next increment
-- Define an ECR repository in Terraform.
-- Review the plan before applying it.
-- Publish the verified container image.
-- Subsequently provision and run an on-demand ECS/Fargate task,
-  with scoped IAM roles and centralized CloudWatch logs.
-
  ## October 16, 2026 — ECR milestone
 
 - Installed Terraform v1.16.6; initialized AWS provider v6.69.1.
@@ -273,3 +260,16 @@ The product should distinguish:
 - Still to verify: budget notification recipient email verification.
 - Deferred: sandbox-only budget filter and existing capstone cost review.
 - Next implementation: on-demand ECS/Fargate execution with CloudWatch logs. 
+
+## October 17, 2026 - Fargate
+- Scoped IAM roles
+- Bounded Fargate run with centralized CloudWatch logs. 
+- Local Kubernetes Job exercise.
+
+| Check | Analyst | Restricted user |
+|---|---|---|
+| Search | Allowed | Allowed |
+| Read | Allowed | Denied: missing `documents.read` |
+| Document contents returned | Yes | No |
+| Audit events in CloudWatch | Confirmed | Confirmed |
+| Task completion | Stopped, exit `0` | Stopped, exit `0` |
