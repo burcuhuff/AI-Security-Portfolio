@@ -285,3 +285,18 @@ Verified in AWS:
 
 This remains a stdio demo with simulated identities, it is not a
 network accessible MCP service.
+
+### Local Kubernetes validation
+
+Validated the containerized stdio demo on a single node kind cluster
+using Kubernetes Jobs for analyst and restricted_user scenarios.
+
+The manifests specify non-root execution, disabled privilege escalation,
+dropped Linux capabilities, CPU/memory requests and limits, no mounted
+service account token, and bounded execution with no retries after failure.
+
+Both Jobs completed. Application audit logs confirmed analyst search/read
+access and restricted_user search access with read denial.
+
+This is local Kubernetes practice, not an EKS deployment. 
+Images are loaded into the node directly, logs are inspected with kubectl.
