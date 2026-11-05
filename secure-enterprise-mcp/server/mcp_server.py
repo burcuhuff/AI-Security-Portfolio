@@ -7,6 +7,7 @@ from server.security.auth import authenticate_user
 from server.security.authorization import authorize_tool
 from server.tools.read_document import read_document
 from server.tools.search_documents import search_documents
+from server.rag.service import answer_question
 
 
 mcp = MCPServer("Secure Enterprise MCP")
@@ -46,6 +47,12 @@ def read_enterprise_document(document_id: str) -> dict[str, str]:
     )
 
     return read_document(document_id)
+
+@mcp.tool()
+def answer_enterprise_question(query: str) -> dict:
+    """Answer from trusted evidence; requires search and read permissions."""
+    return answer_question(query, CURRENT_USER)
+
 
 if __name__ == "__main__":
     mcp.run()

@@ -1,0 +1,6 @@
+Synthetic enterprise incident response procedure (portfolio demonstration only).
+For a suspected security incident, record the incident time and affected system,
+notify the security response team, and preserve relevant audit logs.
+Contain the affected integration using the approved change process.
+Do not include credentials or customer data in incident tickets.
+The incident lead coordinates recovery and documents follow-up actions.
