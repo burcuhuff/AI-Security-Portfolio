@@ -5,6 +5,7 @@
 - [Part 4 — Audit and Security Observability](#part-4---audit-and-security-observability)
 - [Part 5 — CI Build](#part-5---ci-build)
 - [Part 6 — AWS and Terraform](#part-6---aws-and-terraform)
+- [Part 7 - Read Only RAG](#part-7--read-only-rag)
 
 
 # PART 1 - MCP Implementation
@@ -1142,3 +1143,13 @@ and centralized CloudWatch logging.
 - On demand tasks with no continuously running ECS service.
 - CloudWatch captures stdout/stderr, the container local audit file is short lived, 7 days.
 - Demo output includes synthetic document content, sensitive data use will require removing that content from logs.
+
+# PART 7 - Read Only RAG
+
+<img src="./.assets/overallFlow-diagram.png" width="600" height="900">
+
+| File | Job |
+|---|---|
+| `retrieval.py` | **Find evidence.** Read eligible corpus files, rank matching passages, and label selected sources. |
+| `models.py` | **Talk to the model provider.** Send instructions and evidence to Bedrock and extract its response. |
+| `service.py` | **Coordinate the workflow.** Enforce authorization, retrieve evidence, invoke the model, validate the result, and audit it. |

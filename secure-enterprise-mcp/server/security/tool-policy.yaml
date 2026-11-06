@@ -1,6 +1,14 @@
 # server/security/tool-policy.yaml
 # declarative governance design
 tools:
+  answer_enterprise_question:
+    risk: medium
+    required_scopes:
+      - documents.search
+      - documents.read
+    approval_required: false
+    audit_required: true
+
   search_enterprise_documents:
     risk: low
     required_scopes:

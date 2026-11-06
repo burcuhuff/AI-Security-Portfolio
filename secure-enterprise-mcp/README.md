@@ -300,3 +300,22 @@ access and restricted_user search access with read denial.
 
 This is local Kubernetes practice, not an EKS deployment. 
 Images are loaded into the node directly, logs are inspected with kubectl.
+
+## Read-only RAG increment
+
+The `answer_enterprise_question` tool requires both document search and read scopes.
+It uses bounded lexical retrieval over the synthetic trusted corpus and a Bedrock
+Converse adapter, with response/citation validation and metadata audit events.
+Identities remain simulated; this is a fixed workflow with corpus-level scope
+checks, not an autonomous agent or per-document ACL implementation.
+
+- [Architecture and code walkthrough](docs/RAG_WALKTHROUGH.md)
+- [Local verification and live Bedrock runbook](docs/RAG_RUNBOOK.md)
+
+Validation on November 5, 2026: 40 local tests passed. Real MCP runs verified
+denial and no-evidence paths. Two live Amazon Nova Micro calls in us-east-1
+produced a supported incident-response summary and an appropriate abstention
+for an unspecified retention duration. These are small manual evaluation examples,
+not a general quality benchmark. The updated Docker image passed the original search/read smoke checks and the
+new RAG denial/no-evidence checks. Live Bedrock access from a container and
+Fargate redeployment remain unverified; application identities are still simulated.
