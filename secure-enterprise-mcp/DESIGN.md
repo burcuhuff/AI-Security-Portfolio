@@ -1151,5 +1151,6 @@ and centralized CloudWatch logging.
 | File | Job |
 |---|---|
 | `retrieval.py` | **Find evidence.** Read eligible corpus files, rank matching passages, and label selected sources. |
+| `graph_grounding.py` | **Resolve governed relationships.** Retrieve bounded graph facts and verify that every edge points to a trusted source document. |
 | `models.py` | **Talk to the model provider.** Send instructions and evidence to Bedrock and extract its response. |
 | `service.py` | **Coordinate the workflow.** Enforce authorization, retrieve evidence, invoke the model, validate the result, and audit it. |
