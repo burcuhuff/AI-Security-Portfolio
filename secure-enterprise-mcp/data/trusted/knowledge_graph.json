@@ -1,0 +1,81 @@
+{
+  "nodes": [
+    {
+      "id": "incident_response_process",
+      "label": "incident response process",
+      "aliases": ["security incident", "security breach", "suspected incident"]
+    },
+    {
+      "id": "incident_details",
+      "label": "incident time and affected system",
+      "aliases": ["incident record", "affected system"]
+    },
+    {
+      "id": "security_response_team",
+      "label": "security response team",
+      "aliases": ["security team", "incident contact", "who to contact", "notify after breach"]
+    },
+    {
+      "id": "audit_logs",
+      "label": "relevant audit logs",
+      "aliases": ["security logs", "incident logs"]
+    },
+    {
+      "id": "affected_integration",
+      "label": "affected integration",
+      "aliases": ["impacted integration", "compromised integration"]
+    },
+    {
+      "id": "approved_change_process",
+      "label": "approved change process",
+      "aliases": ["change control", "approved containment"]
+    },
+    {
+      "id": "incident_lead",
+      "label": "incident lead",
+      "aliases": ["incident owner", "response lead"]
+    },
+    {
+      "id": "recovery_follow_up",
+      "label": "recovery and follow-up actions",
+      "aliases": ["incident recovery", "post-incident actions"]
+    }
+  ],
+  "edges": [
+    {
+      "subject": "incident_response_process",
+      "predicate": "records",
+      "object": "incident_details",
+      "fact": "Record the incident time and affected system for a suspected security incident.",
+      "source_document": "incident_response_demo.txt"
+    },
+    {
+      "subject": "incident_response_process",
+      "predicate": "notifies",
+      "object": "security_response_team",
+      "fact": "Notify the security response team for a suspected security incident.",
+      "source_document": "incident_response_demo.txt"
+    },
+    {
+      "subject": "incident_response_process",
+      "predicate": "preserves",
+      "object": "audit_logs",
+      "fact": "Preserve relevant audit logs during incident response.",
+      "source_document": "incident_response_demo.txt"
+    },
+    {
+      "subject": "affected_integration",
+      "predicate": "contained_using",
+      "object": "approved_change_process",
+      "fact": "Contain the affected integration using the approved change process.",
+      "source_document": "incident_response_demo.txt"
+    },
+    {
+      "subject": "incident_lead",
+      "predicate": "coordinates",
+      "object": "recovery_follow_up",
+      "fact": "The incident lead coordinates recovery and documents follow-up actions.",
+      "source_document": "incident_response_demo.txt"
+    }
+  ]
+}

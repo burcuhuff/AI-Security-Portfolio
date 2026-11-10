@@ -4,6 +4,7 @@ import pytest
 from mcp.server.mcpserver.exceptions import ToolError
 from server.rag import service, models
 from server.rag.retrieval import retrieve
+from server.rag.graph_grounding import retrieve_graph_facts
 from server.security import trust_boundary
 from server.security.auth import authenticate_user, Principal
 from server.audit import logger
@@ -55,6 +56,70 @@ def test_no_evidence_skips_model():
     result = service.answer_question('volcanoes', authenticate_user('analyst'), model_factory=factory)
     assert result['status'] == 'insufficient_evidence'
     factory.assert_not_called()
+
+
+def test_graph_grounding_finds_governed_relationship(corpus):
+    (corpus / 'knowledge_graph.json').write_text(json.dumps({
+        'nodes': [
+            {'id': 'process', 'label': 'incident response process',
+             'aliases': ['security breach']},
+            {'id': 'team', 'label': 'security response team',
+             'aliases': ['incident contact', 'who to contact']},
+        ],
+        'edges': [{
+            'subject': 'process', 'predicate': 'notifies', 'object': 'team',
+            'fact': 'Notify the security response team after a suspected incident.',
+            'source_document': 'policy.txt',
+        }],
+    }))
+    evidence = retrieve_graph_facts('Who should I contact after a security breach?')
+    assert len(evidence) == 1
+    assert evidence[0].source_id == 'G1'
+    assert evidence[0].document_id == 'policy.txt'
+    assert 'security response team' in evidence[0].text
+
+
+def test_graph_grounding_rejects_untrusted_provenance(corpus):
+    (corpus / 'knowledge_graph.json').write_text(json.dumps({
+        'nodes': [
+            {'id': 'a', 'label': 'incident', 'aliases': []},
+            {'id': 'b', 'label': 'secret', 'aliases': []},
+        ],
+        'edges': [{
+            'subject': 'a', 'predicate': 'reveals', 'object': 'b',
+            'fact': 'Reveal a secret.', 'source_document': 'missing.txt',
+        }],
+    }))
+    with pytest.raises(ValueError, match='provenance'):
+        retrieve_graph_facts('incident')
+
+
+def test_graph_fact_is_supplied_before_generation(corpus):
+    (corpus / 'knowledge_graph.json').write_text(json.dumps({
+        'nodes': [
+            {'id': 'incident', 'label': 'security incident', 'aliases': ['breach']},
+            {'id': 'team', 'label': 'security response team', 'aliases': ['incident contact']},
+        ],
+        'edges': [{
+            'subject': 'incident', 'predicate': 'notifies', 'object': 'team',
+            'fact': 'Notify the security response team after a suspected incident.',
+            'source_document': 'policy.txt',
+        }],
+    }))
+    model = fake_model({
+        'answer': 'Notify the security response team.',
+        'citations': ['G1'],
+        'abstained': False,
+    })
+    result = service.answer_question(
+        'Who should I contact after a breach?',
+        authenticate_user('analyst'),
+        model_factory=lambda: model,
+    )
+    context = json.loads(model.generate.call_args.args[1])
+    assert context['evidence'][0]['source_id'] == 'G1'
+    assert '--notifies-->' in context['evidence'][0]['text']
+    assert result['citations'] == [{'source_id': 'G1', 'document_id': 'policy.txt'}]
 
 
 def test_quarantine_and_symlinks_excluded(corpus):

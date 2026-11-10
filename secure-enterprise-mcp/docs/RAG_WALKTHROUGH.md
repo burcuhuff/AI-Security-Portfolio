@@ -8,9 +8,10 @@ and Fargate redeployment of this increment remain unverified.
 ## What changed
 
 The server now exposes `answer_enterprise_question(query)`. It requires BOTH
-`documents.search` and `documents.read`. The application retrieves up to three
-passages from the synthetic trusted corpus, sends those passages to a model,
-validates its JSON response and source references, and returns an answer.
+`documents.search` and `documents.read`. The application retrieves bounded,
+provenance-backed relationships from a small governed knowledge graph and up to
+three lexical passages from the synthetic trusted corpus. It sends that evidence
+to a model, validates its JSON response and source references, and returns an answer.
 
 Identity is still simulated. This is a fixed read-only workflow, not an autonomous
 agent. All users with both scopes can access the same trusted corpus. There are
@@ -23,7 +24,7 @@ flowchart TD
     U[CLI question and simulated principal] --> T[MCP question-answer tool]
     T --> A{Search and read scopes?}
     A -->|No| D[Audit denial and stop]
-    A -->|Yes| R[Bounded trusted-document retrieval]
+    A -->|Yes| R[Governed graph and lexical retrieval]
     R --> E{Matching evidence?}
     E -->|No| N[Return insufficient evidence]
     E -->|Yes| P[Question and source-labeled evidence]
@@ -45,6 +46,7 @@ as data. That reduces action risk but does not prove resistance to answer poison
 | `server/security/tool-policy.yaml` | New tool requires both scopes | Why must question-answering require read? |
 | `server/mcp_server.py` | Registers the new MCP tool | Where does the principal come from? |
 | `server/rag/service.py` | Authorization, orchestration, response validation, audit | Where does each failure stop execution? |
+| `server/rag/graph_grounding.py` | Deterministic entity/relationship matching with document provenance | Why is a verified relationship stronger than vector similarity? |
 | `server/rag/retrieval.py` | Deterministic lexical ranking and bounded passages | What makes a passage relevant, and what are the limitations? |
 | `server/rag/models.py` | Bedrock Converse adapter | Which component needs AWS permission? |
 | `client/rag_demo.py` | Calls the new tool over stdio | How do configuration and errors reach the caller? |
@@ -56,8 +58,10 @@ as data. That reduces action risk but does not prove resistance to answer poison
 2. MCP dispatches to `answer_enterprise_question`.
 3. `answer_question` calls the existing authorization function before retrieval.
 4. Required search/read scopes are satisfied; authorization is audited.
-5. The retriever ranks passages by overlapping non-stopword query terms.
-6. At most three 1,200-character passages become evidence labeled S1, S2, S3.
+5. The graph retriever matches governed entities and relationships, verifies each
+   edge's trusted source document, and labels up to three facts G1, G2, G3.
+6. The lexical retriever ranks passages by overlapping non-stopword query terms;
+   at most three passages become evidence labeled S1, S2, S3.
 7. The adapter calls Bedrock with instructions and JSON-encoded question/evidence.
 8. The application checks response shape, types, and citation membership.
 9. It records metadata and returns the answer with document IDs.
@@ -74,7 +78,7 @@ The new CLI exits 1 for a tool error; the original client remains unchanged.
 
 ## No-evidence request
 
-An authorized query with no lexical matches returns `insufficient_evidence`
+An authorized query with no graph or lexical matches returns `insufficient_evidence`
 without constructing the model. If matching evidence is present but inadequate,
 we ask the model to abstain and evaluate whether it does so correctly. That
 semantic judgment is not guaranteed by the deterministic no-match check.
@@ -84,7 +88,10 @@ semantic judgment is not guaranteed by the deterministic no-match check.
 - Nonempty query: maximum 2,000 characters.
 - Corpus: maximum 100 `.txt` entries; each document maximum 32 KiB.
 - Symlinks are skipped; paths use the existing trusted resolver.
-- Three passages maximum, each 1,200 characters; simple fixed character slicing.
+- Three graph facts maximum and three lexical passages maximum. Passages use
+  simple fixed 1,200-character slicing.
+- The graph is limited to 200 nodes, 500 edges, and 64 KiB. Every edge must name
+  an existing regular `.txt` file inside the trusted corpus as provenance.
 - Model output budget: 600 tokens; SDK connection timeout 5 seconds, read timeout
   45 seconds, at most two attempts. These are not a single end-to-end deadline.
 - Non-normal completion, malformed JSON, unknown citations, and provider errors
@@ -99,11 +106,15 @@ semantic judgment is not guaranteed by the deterministic no-match check.
 
 ## What is not implemented
 
-Verified user authentication; document ACLs; vector retrieval; reranking;
+Verified user authentication; document ACLs; embedding/vector retrieval; reranking;
 conversation memory; write tools; integrated human approval; shared-service scaling;
 end-to-end request deadlines; live-model injection evaluation; a new cloud deployment.
 The trusted directory must be controlled by the operator: path checks are not a
 sandbox against an attacker who can concurrently modify server files.
+
+The graph demonstrates deterministic, provenance-backed grounding; it does not
+prove that a curator entered a fact correctly. Production governance would require
+approved ingestion, ownership, effective dates, versioning, and change review.
 
 ## Bedrock and identities
 
